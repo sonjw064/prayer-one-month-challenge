@@ -29,7 +29,7 @@ export function AdminHubDashboard({
       <section className="admin-page-heading">
         <p className="eyebrow">전체 요약</p>
         <h1>대시보드</h1>
-        <p>56사랑의 주요 현황을 한눈에 확인하세요.</p>
+        <p>3D의 주요 현황을 한눈에 확인하세요.</p>
       </section>
 
       <section className="admin-summary-grid" aria-label="주요 현황">

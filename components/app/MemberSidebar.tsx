@@ -22,7 +22,7 @@ function isActive(pathname: string, href: string) {
 export function MemberSidebar({ onNavigate, unreadCount, pastoralVisible = false, pastoralCount = 0, prayerMenuEnabled = true, prayerMenuName = "기도운동", prayerHasUnread = false }: { onNavigate?: () => void; unreadCount: number; pastoralVisible?: boolean; pastoralCount?: number; prayerMenuEnabled?: boolean; prayerMenuName?: string; prayerHasUnread?: boolean }) {
   const pathname = usePathname();
   return (
-    <nav className="member-nav" aria-label="56사랑 메뉴">
+    <nav className="member-nav" aria-label="3D 메뉴">
       {memberNav.filter(item =>
         (item.href !== "/" || prayerMenuEnabled) &&
         (item.href !== "/pastoral-reports" || pastoralVisible)).map((item) => {

@@ -36,7 +36,7 @@ test("saved global visibility controls member and admin navigation on mobile and
     await member.evaluate(() => window.dispatchEvent(new Event("focus")));
     await expect(member).toHaveURL(/\/notices$/);
     await member.getByRole("button", { name: "메뉴 열기", exact: true }).click();
-    const memberNav = member.getByRole("navigation", { name: "56사랑 메뉴" });
+    const memberNav = member.getByRole("navigation", { name: "3D 메뉴" });
     await expect(memberNav.getByRole("link", { name: "기도운동", exact: true })).toHaveCount(0);
     await expect(memberNav.getByRole("link").first()).toContainText("공지");
     await expect(memberNav.getByRole("link", { name: "심방신청" })).toBeVisible();
@@ -50,7 +50,7 @@ test("saved global visibility controls member and admin navigation on mobile and
     await expect(checkbox).not.toBeChecked();
     await page.goto("/");
     await expect(page).toHaveURL(/\/notices$/);
-    await expect(page.getByRole("navigation", { name: "56사랑 메뉴" }).getByRole("link", { name: "기도운동", exact: true })).toHaveCount(0);
+    await expect(page.getByRole("navigation", { name: "3D 메뉴" }).getByRole("link", { name: "기도운동", exact: true })).toHaveCount(0);
     await member.goto("/");
     await expect(member).toHaveURL(/\/notices$/);
 
@@ -72,7 +72,7 @@ test("saved global visibility controls member and admin navigation on mobile and
     await expect(memberNav).toBeInViewport({ ratio: 1 });
     await member.screenshot({ path: testInfo.outputPath("mobile-menu-enabled.png"), fullPage: true, animations: "disabled" });
     await page.goto("/notices");
-    const adminNav = page.getByRole("navigation", { name: "56사랑 메뉴" });
+    const adminNav = page.getByRole("navigation", { name: "3D 메뉴" });
     await expect(adminNav.getByRole("link").nth(0)).toContainText("공지");
     await expect(adminNav.getByRole("link").nth(1)).toContainText("기도운동");
     await page.screenshot({ path: testInfo.outputPath("desktop-menu-enabled.png"), fullPage: true, animations: "disabled" });

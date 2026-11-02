@@ -23,7 +23,7 @@ function routeFiles(root: string): string[] {
   return results;
 }
 
-describe("56사랑 community hub access boundaries", () => {
+describe("3D community hub access boundaries", () => {
   it("requires admin authorization in every admin API route", () => {
     const routes = routeFiles("app/api/admin");
     expect(routes.length).toBeGreaterThan(0);

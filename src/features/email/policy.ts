@@ -31,19 +31,19 @@ export function safeVisitTime(value: string | null | undefined): string | null {
 }
 
 export function formatNotification(kind: NotificationKind, input: NotificationIdentity): {subject: string; text: string} {
-  if (kind === "test") return {subject:"[56사랑] 이메일 알림 연결 확인",text:"56사랑 이메일 알림 연결 확인 메일입니다."};
+  if (kind === "test") return {subject:"[3D] 이메일 알림 연결 확인",text:"3D 이메일 알림 연결 확인 메일입니다."};
   const name = plainLabel(input.requesterName, 80) || "신청자";
   const sam = plainLabel(input.samLabel, 100);
   const last = name.codePointAt(name.length - 1) ?? 0;
   const particle = last >= 0xac00 && last <= 0xd7a3 && (last - 0xac00) % 28 !== 0 ? "이" : "가";
   const person = `${sam ? `${sam.endsWith("샘") ? sam : `${sam}샘`} ` : ""}${name}${particle}`;
-  if (kind === "pastoral") return {subject:"[56사랑] 목양지 접수",text:`${person} 목양지를 제출하였습니다.`};
-  if (kind === "prayer") return {subject:"[56사랑] 기도요청 접수",text:`${person} 기도요청을 제출했습니다.`};
+  if (kind === "pastoral") return {subject:"[3D] 목양지 접수",text:`${person} 목양지를 제출하였습니다.`};
+  if (kind === "prayer") return {subject:"[3D] 기도요청 접수",text:`${person} 기도요청을 제출했습니다.`};
   if (kind !== "visit" || !/^\d{4}-\d{2}-\d{2}$/u.test(input.visitDate ?? "")) throw new Error("INVALID_VISIT_DATE");
   const date = new Date(`${input.visitDate}T00:00:00Z`);
   if (!Number.isFinite(date.getTime()) || date.toISOString().slice(0,10) !== input.visitDate) throw new Error("INVALID_VISIT_DATE");
   const time = safeVisitTime(input.visitTime);
-  return {subject:"[56사랑] 심방신청 접수",text:`${person} ${date.getUTCMonth()+1}월 ${date.getUTCDate()}일${time ? ` ${time}` : ""}에 심방을 신청했습니다.`};
+  return {subject:"[3D] 심방신청 접수",text:`${person} ${date.getUTCMonth()+1}월 ${date.getUTCDate()}일${time ? ` ${time}` : ""}에 심방을 신청했습니다.`};
 }
 
 export function encodeMessage(input: {email:string; subject:string; text:string; id:string; date:Date}): string {

@@ -45,7 +45,7 @@ function MemberShellContent({ user, menuOpen, setMenuOpen, children }: {
       <aside className={`community-sidebar${menuOpen ? " is-open" : ""}`}>
         <div className="sidebar-brand">
           <img src="/icons/56-heart-192.png" alt="" width={44} height={44} />
-          <strong>56사랑</strong>
+          <strong>3D</strong>
         </div>
 
         <MemberSidebar prayerMenuEnabled={prayerMenuEnabled} prayerMenuName={name} pastoralVisible={pastoral.visible} pastoralCount={pastoral.count} unreadCount={unreadCount} prayerHasUnread={prayerHasUnread} onNavigate={() => setMenuOpen(false)} />
@@ -80,7 +80,7 @@ function MemberShellContent({ user, menuOpen, setMenuOpen, children }: {
             {pastoral.count > 0 ? <ReportBadge count={pastoral.count} /> : <UnreadNoticeBadge count={unreadCount} />}
           </button>
           <div>
-            <h1>56공동체</h1>
+            <h1>삼덕청년부</h1>
             <p className="community-verse">성령이 하나 되게 하신 것을 힘써 지키라(엡 4:3)</p>
           </div>
         </header>

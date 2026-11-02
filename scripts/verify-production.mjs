@@ -96,7 +96,7 @@ async function main() {
       if (passed && kind === 'dashboard-release') passed = JSON.parse(body).release === expectedDashboard;
       if (passed && kind === 'release') passed = JSON.parse(body).release === expected;
       if (passed && kind === 'health') { const data = JSON.parse(body); passed = data.status === 'ok' && data.database === 'ok'; }
-      if (passed && kind === 'public-about') passed = body.includes('56사랑') && body.includes('Google Calendar') && body.includes('href="/privacy"');
+      if (passed && kind === 'public-about') passed = body.includes('3D') && body.includes('Google Calendar') && body.includes('href="/privacy"');
       if (passed && kind === 'public-privacy') passed = body.includes('개인정보처리방침') && body.includes('calendar.calendarlist.readonly') && body.includes('gmail.send') && body.includes('Limited Use') && body.includes('mailto:ditto0310@gmail.com');
       if (passed && kind === 'login') passed = body.includes('비밀번호');
       if (passed && kind === 'private') passed = ['UNAUTHORIZED','FORBIDDEN'].includes(JSON.parse(body).code);

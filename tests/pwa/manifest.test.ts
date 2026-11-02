@@ -12,8 +12,8 @@ function pngSize(path: string) {
 describe("PWA manifest", () => {
   it("uses the requested app name and standalone mode", () => {
     const value = manifest();
-    expect(value.name).toBe("56사랑");
-    expect(value.short_name).toBe("56사랑");
+    expect(value.name).toBe("3D");
+    expect(value.short_name).toBe("3D");
     expect(value.display).toBe("standalone");
     expect(value.start_url).toBe("/");
   });

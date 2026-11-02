@@ -9,7 +9,7 @@ export default function PublicLayout({ children }: Readonly<{ children: React.Re
       <header className="public-header">
         <Link className="public-brand" href="/about">
           <Image src="/icons/56-heart-192.png" alt="" width={48} height={48} unoptimized />
-          <span><strong>56사랑</strong><small>삼덕교회 56공동체</small></span>
+          <span><strong>3D</strong><small>삼덕청년부</small></span>
         </Link>
         <nav className="public-nav" aria-label="공개 안내 메뉴">
           <Link href="/about">앱 소개</Link>
@@ -19,7 +19,7 @@ export default function PublicLayout({ children }: Readonly<{ children: React.Re
       </header>
       <main id="public-main" className="public-main" tabIndex={-1}>{children}</main>
       <footer className="public-footer">
-        <p><strong>56사랑</strong> · 삼덕교회 56공동체</p>
+        <p><strong>3D</strong> · 삼덕청년부</p>
         <p><Link href="/privacy">개인정보처리방침</Link> · <a href="mailto:ditto0310@gmail.com">운영 담당자에게 문의</a></p>
       </footer>
     </div>

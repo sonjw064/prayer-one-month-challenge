@@ -31,9 +31,9 @@ test("admin edits the activity name and description; members see them without lo
     await expect(member.locator(".activity-description script")).toHaveCount(0);
     await expect(member.getByRole("region", { name: "참여 완료 달력" })).toBeVisible();
     await member.getByRole("button", { name: "메뉴 열기", exact: true }).click();
-    await expect(member.getByRole("navigation", { name: "56사랑 메뉴" }).getByRole("link", { name, exact: true })).toBeVisible();
+    await expect(member.getByRole("navigation", { name: "3D 메뉴" }).getByRole("link", { name, exact: true })).toBeVisible();
     await expectNoOverflow(member);
-    await member.getByRole("navigation", { name: "56사랑 메뉴" }).getByRole("link", { name, exact: true }).click({ timeout: 10_000 });
+    await member.getByRole("navigation", { name: "3D 메뉴" }).getByRole("link", { name, exact: true }).click({ timeout: 10_000 });
     await expect.poll(() => member.locator(".community-sidebar").evaluate((element) => element.getBoundingClientRect().right)).toBeLessThanOrEqual(0);
     await expectNoOverflow(member);
     expect(await member.locator(".activity-description").evaluate((element) => element.scrollWidth <= element.clientWidth && element.getBoundingClientRect().right <= window.innerWidth)).toBe(true);

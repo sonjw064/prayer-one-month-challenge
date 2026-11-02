@@ -20,8 +20,8 @@ jobs:
     timeout-minutes: 6
     env:
       PUBLIC_APP_URL: ${{ vars.PUBLIC_APP_URL }}
-      EXPECTED_APP_NAME: ${{ vars.PUBLIC_APP_NAME || '56사랑' }}
-      EXPECTED_APP_HEADING: ${{ vars.PUBLIC_APP_HEADING || '56공동체' }}
+      EXPECTED_APP_NAME: ${{ vars.PUBLIC_APP_NAME || '3D' }}
+      EXPECTED_APP_HEADING: ${{ vars.PUBLIC_APP_HEADING || '삼덕청년부' }}
       EXPECTED_RELEASE: ${{ vars.PUBLIC_RELEASE_MARKER || 'community-photo-only-20261012-v2' }}
     steps:
       - uses: actions/setup-node@v4

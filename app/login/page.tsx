@@ -8,8 +8,8 @@ export default async function LoginPage() {
   return (
     <main className="shell auth-shell">
       <header className="hero-copy">
-        <p className="eyebrow">56사랑</p>
-        <h1>56공동체</h1>
+        <p className="eyebrow">3D</p>
+        <h1>삼덕청년부</h1>
         <p className="community-verse">성령이 하나 되게 하신 것을 힘써 지키라(엡 4:3)</p>
       </header>
       <LoginForm />

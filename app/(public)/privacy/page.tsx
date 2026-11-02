@@ -3,7 +3,7 @@ import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "개인정보처리방침",
-  description: "56사랑이 처리하는 회원 정보, Google Calendar와 Gmail 접수 알림의 이용 목적, 보관, 공유, 삭제 및 문의 방법을 안내합니다.",
+  description: "3D가 처리하는 회원 정보, Google Calendar와 Gmail 접수 알림의 이용 목적, 보관, 공유, 삭제 및 문의 방법을 안내합니다.",
   alternates: { canonical: "https://prayer-one-month-challenge.vercel.app/privacy" },
 };
 
@@ -18,7 +18,7 @@ export default function PrivacyPage() {
   return (
     <article className="public-policy">
       <header className="public-policy-heading">
-        <p className="public-eyebrow">56사랑 · 개인정보 안내</p>
+        <p className="public-eyebrow">3D · 개인정보 안내</p>
         <h1>개인정보처리방침</h1>
         <p className="public-lead">어떤 정보를 왜 사용하는지, 어떻게 보관하고 삭제하는지 안내합니다.</p>
         <p className="public-caption">시행일: <time dateTime="2026-10-10">2026년 10월 10일</time> · 버전 1.1</p>
@@ -29,8 +29,8 @@ export default function PrivacyPage() {
       </nav>
       <section id="scope">
         <h2>1. 운영 주체와 적용 범위</h2>
-        <p>56사랑은 삼덕교회 56공동체의 기도운동, 심방신청, 기도요청, 공지, 커뮤니티와 목양지 업무를 돕는 웹앱입니다. 운영 및 개인정보 문의는 56공동체 운영 담당자가 접수합니다.</p>
-        <p>이 방침은 56사랑에서 처리하는 정보에 적용됩니다. Google 계정과 Google Calendar·Gmail 자체의 데이터에는 Google의 개인정보처리방침도 적용됩니다. 앱 소개와 이 방침은 로그인 없이 열람할 수 있습니다.</p>
+        <p>3D는 삼덕청년부의 기도운동, 심방신청, 기도요청, 공지, 커뮤니티와 목양지 업무를 돕는 웹앱입니다. 운영 및 개인정보 문의는 삼덕청년부 운영 담당자가 접수합니다.</p>
+        <p>이 방침은 3D에서 처리하는 정보에 적용됩니다. Google 계정과 Google Calendar·Gmail 자체의 데이터에는 Google의 개인정보처리방침도 적용됩니다. 앱 소개와 이 방침은 로그인 없이 열람할 수 있습니다.</p>
       </section>
       <section id="data">
         <h2>2. 처리하는 정보와 목적</h2>
@@ -56,7 +56,7 @@ export default function PrivacyPage() {
         <p>심방 일정의 제목과 날짜, 신청자·리더 이름, 장소, 희망 시간과 참석자 명단을 선택한 캘린더에 전송합니다. 앱에 입력한 심방 사유와 별도의 기도요청 내용은 심방 일정 설명에 넣지 않습니다. 전송된 정보는 해당 Google 캘린더의 공유 설정에 따라 다른 사람에게 보일 수 있습니다.</p>
         <h3>목적 제한</h3>
         <p>이 Calendar 연동 데이터와 그 파생 정보는 표시된 심방 일정 기능 제공에만 사용합니다. 판매, 광고 타기팅, 신용평가 또는 범용 AI 모델 학습에 사용하거나 제공하지 않습니다. 기능 수행에 필요한 처리 외에 사람이 내용을 열람하는 경우는 이용자의 구체적인 동의, 보안 문제 대응 또는 법령상 의무 등으로 제한합니다.</p>
-        <p>56사랑의 Google API 정보 이용 및 다른 앱으로의 전송에는 제한적 사용(Limited Use) 요건을 포함한 <a href="https://developers.google.com/terms/api-services-user-data-policy" rel="noreferrer">Google API Services User Data Policy</a>가 적용됩니다.</p>
+        <p>3D의 Google API 정보 이용 및 다른 앱으로의 전송에는 제한적 사용(Limited Use) 요건을 포함한 <a href="https://developers.google.com/terms/api-services-user-data-policy" rel="noreferrer">Google API Services User Data Policy</a>가 적용됩니다.</p>
       </section>
       <section id="email-notifications">
         <h2>3-1. Gmail 접수 이메일 알림</h2>
@@ -88,7 +88,7 @@ export default function PrivacyPage() {
       </section>
       <section id="rights">
         <h2>6. 연결 해제와 권리 행사</h2>
-        <p>관리자는 <strong>관리자 → 심방 신청 관리 → Google Calendar → 연결 해제</strong>를 이용할 수 있습니다. 앱은 Google 권한 철회를 요청하고 로컬 연결 정보를 삭제합니다. Google 측 철회 요청이 실패할 수도 있으므로 완전히 철회하려면 <a href="https://myaccount.google.com/connections" rel="noreferrer">Google 계정의 서드 파티 연결 관리</a>에서도 56사랑에 부여한 접근 권한을 삭제해 주세요. Google에서만 권한을 철회한 경우 앱에 남은 연결 정보의 삭제는 별도로 요청할 수 있습니다.</p>
+        <p>관리자는 <strong>관리자 → 심방 신청 관리 → Google Calendar → 연결 해제</strong>를 이용할 수 있습니다. 앱은 Google 권한 철회를 요청하고 로컬 연결 정보를 삭제합니다. Google 측 철회 요청이 실패할 수도 있으므로 완전히 철회하려면 <a href="https://myaccount.google.com/connections" rel="noreferrer">Google 계정의 서드 파티 연결 관리</a>에서도 3D에 부여한 접근 권한을 삭제해 주세요. Google에서만 권한을 철회한 경우 앱에 남은 연결 정보의 삭제는 별도로 요청할 수 있습니다.</p>
         <p>연동을 해제하거나 승인하지 않으면 Google 일정 조회와 동기화 및 이에 의존하는 심방 신청 기능이 제한됩니다. 다른 공동체 기능은 이용 권한과 운영 설정에 따라 계속 사용할 수 있습니다.</p>
         <p>본인 정보의 열람·정정·삭제, 처리 정지, 회원 이용 종료 또는 동의 철회는 <a href="mailto:ditto0310@gmail.com">ditto0310@gmail.com</a>으로 요청해 주세요. 요청 대상과 본인 확인에 필요한 최소한의 정보만 보내고, 비밀번호·인증 토큰·주민등록번호는 보내지 마세요. 담당자가 본인 및 대리 권한을 확인하고 처리 결과나 제한 사유를 안내합니다.</p>
         <p>Google Calendar에 남아 있는 일정은 캘린더 소유자가 직접 삭제하거나 담당자에게 삭제를 요청할 수 있습니다. 캘린더 연결 해제와 회원 자료 삭제는 별개의 절차입니다.</p>
@@ -106,10 +106,10 @@ export default function PrivacyPage() {
       <section id="changes">
         <h2>9. 변경 안내와 문의</h2>
         <p>처리 방식이 달라지면 이 페이지의 시행일과 내용을 수정하고 중요한 변경은 앱의 공지 등으로 안내합니다. 목적이나 권한 범위가 바뀌어 별도 동의가 필요한 경우 이를 먼저 요청합니다.</p>
-        <p><strong>운영·개인정보 문의:</strong> 삼덕교회 56공동체 운영 담당자<br /><a href="mailto:ditto0310@gmail.com">ditto0310@gmail.com</a></p>
+        <p><strong>운영·개인정보 문의:</strong> 삼덕청년부 운영 담당자<br /><a href="mailto:ditto0310@gmail.com">ditto0310@gmail.com</a></p>
         <p>개인정보 관련 상담·신고는 <a href="https://www.privacy.go.kr/" rel="noreferrer">개인정보 포털</a>에서도 안내받을 수 있습니다.</p>
       </section>
-      <Link className="public-text-link" href="/about">← 56사랑 앱 소개로</Link>
+      <Link className="public-text-link" href="/about">← 3D 앱 소개로</Link>
     </article>
   );
 }

@@ -17,7 +17,7 @@ test('Gmail receiver is a single normalized address with no headers',()=>{
  for(const x of ['a@b.com\r\nBcc:x@y.com','a@b.com,c@d.com','Name <a@b.com>','',null])assert.throws(()=>normalizeRecipient(x));
 });
 test('MIME is UTF-8, one recipient and resistant to header injection',()=>{
- const raw=encodeMessage({email:'admin@example.test',subject:'[56사랑] 알림',text:'한 줄 알림',id:'00000000-0000-4000-8000-000000000001',date:new Date('2026-10-10T00:00:00Z')});
+ const raw=encodeMessage({email:'admin@example.test',subject:'[3D] 알림',text:'한 줄 알림',id:'00000000-0000-4000-8000-000000000001',date:new Date('2026-10-10T00:00:00Z')});
  const mime=Buffer.from(raw,'base64url').toString();
  assert.ok(mime.includes('To: admin@example.test\r\n'));assert.ok(mime.includes('charset=UTF-8'));
  assert.ok(mime.includes(Buffer.from('한 줄 알림').toString('base64')));
