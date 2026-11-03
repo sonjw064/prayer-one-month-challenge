@@ -356,6 +356,7 @@ export const calendarEvents = appSchema.table(
     endDate: date("end_date").notNull(),
     startTime: time("start_time"),
     endTime: time("end_time"),
+    isImportant: boolean("is_important").notNull().default(false),
     createdBy: uuid("created_by").references(() => users.id, { onDelete: "set null" }),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),

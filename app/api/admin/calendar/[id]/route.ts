@@ -6,7 +6,7 @@ import {
   assertSameOrigin,
   parseCalendarEventInput,
 } from "../../../../../src/features/calendar/input";
-import { describeEventForPush } from "../../../../../src/features/calendar/month";
+import { describeEventForPush, pushTitleForEvent } from "../../../../../src/features/calendar/month";
 import {
   deleteCalendarEvent,
   updateCalendarEvent,
@@ -39,7 +39,7 @@ export async function PATCH(
       try {
         await sendCalendarEventPush({
           id: event.id,
-          title: event.title,
+          title: pushTitleForEvent(event),
           body: describeEventForPush(event),
           startDate: event.startDate,
         });

@@ -14,6 +14,7 @@ const schema = z.object({
   endDate: dateKey.nullish(),
   startTime: timeKey.nullish(),
   endTime: timeKey.nullish(),
+  isImportant: z.boolean().nullish(),
   notify: z.boolean().nullish(),
 });
 
@@ -51,6 +52,7 @@ export function parseCalendarEventInput(raw: unknown): CalendarEventInput {
     endDate,
     startTime,
     endTime,
+    isImportant: data.isImportant === true,
     notify: data.notify === true,
   };
 }

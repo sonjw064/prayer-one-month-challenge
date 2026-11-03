@@ -14,6 +14,7 @@ const columns = {
   endDate: calendarEvents.endDate,
   startTime: calendarEvents.startTime,
   endTime: calendarEvents.endTime,
+  isImportant: calendarEvents.isImportant,
 };
 
 function trimTime(value: string | null): string | null {
@@ -29,6 +30,7 @@ export function toCalendarEvent(row: {
   endDate: string;
   startTime: string | null;
   endTime: string | null;
+  isImportant: boolean;
 }): CalendarEvent {
   return {
     id: row.id,
@@ -39,6 +41,7 @@ export function toCalendarEvent(row: {
     endDate: row.endDate,
     startTime: trimTime(row.startTime),
     endTime: trimTime(row.endTime),
+    isImportant: row.isImportant,
   };
 }
 
@@ -51,6 +54,7 @@ function values(input: CalendarEventInput) {
     endDate: input.endDate,
     startTime: input.startTime,
     endTime: input.endTime,
+    isImportant: input.isImportant,
   };
 }
 

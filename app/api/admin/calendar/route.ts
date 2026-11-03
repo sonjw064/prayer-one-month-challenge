@@ -5,7 +5,7 @@ import {
   assertSameOrigin,
   parseCalendarEventInput,
 } from "../../../../src/features/calendar/input";
-import { describeEventForPush } from "../../../../src/features/calendar/month";
+import { describeEventForPush, pushTitleForEvent } from "../../../../src/features/calendar/month";
 import {
   createCalendarEvent,
   listCalendarEventsForAdmin,
@@ -43,7 +43,7 @@ export async function POST(request: Request) {
       try {
         await sendCalendarEventPush({
           id: event.id,
-          title: event.title,
+          title: pushTitleForEvent(event),
           body: describeEventForPush(event),
           startDate: event.startDate,
         });

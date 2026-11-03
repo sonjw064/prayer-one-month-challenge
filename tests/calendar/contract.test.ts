@@ -40,6 +40,16 @@ describe("calendar contracts", () => {
     expect(sql).toContain("calendar_events_date_order");
   });
 
+  it("adds the important flag with a safe default and red styling", () => {
+    const sql = read("drizzle/20261103010000_calendar_event_important.sql");
+    expect(sql).toContain("is_important boolean not null default false");
+    for (const path of ["app/api/admin/calendar/route.ts", "app/api/admin/calendar/[id]/route.ts"]) {
+      expect(read(path)).toContain("pushTitleForEvent");
+    }
+    expect(read("components/calendar/CalendarView.tsx")).toContain("evcal-badge");
+    expect(read("app/globals.css")).toContain(".evcal-event.is-important");
+  });
+
   it("adds the calendar menus for members and admins", () => {
     expect(read("components/app/MemberSidebar.tsx")).toContain('href: "/calendar"');
     expect(read("components/admin/AdminSidebar.tsx")).toContain('href: "/admin/calendar"');
