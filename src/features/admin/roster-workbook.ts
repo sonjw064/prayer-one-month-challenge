@@ -24,6 +24,8 @@ export function buildRosterWorkbook(rows: RosterExportRow[]): Buffer {
     ]),
   ]);
   sheet["!cols"] = [{ wch: 14 }, { wch: 12 }, { wch: 16 }, { wch: 10 }, { wch: 10 }];
+  // Filter buttons on the header row, so the file can be sorted and filtered in Excel.
+  sheet["!autofilter"] = { ref: `A1:E${rows.length + 1}` };
 
   const workbook = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(workbook, sheet, "명단");

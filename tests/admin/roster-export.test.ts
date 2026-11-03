@@ -27,6 +27,13 @@ describe("roster export workbook", () => {
     expect(matrix).toHaveLength(rows.length + 1);
   });
 
+  it("turns on the header filter for the whole table", () => {
+    const sheet = XLSX.read(buildRosterWorkbook(rows), { type: "buffer" }).Sheets["명단"];
+    expect(sheet["!autofilter"]?.ref).toBe(`A1:E${rows.length + 1}`);
+    const empty = XLSX.read(buildRosterWorkbook([]), { type: "buffer" }).Sheets["명단"];
+    expect(empty["!autofilter"]?.ref).toBe("A1:E1");
+  });
+
   it("stores phone numbers as text so the leading zero survives", () => {
     const workbook = XLSX.read(buildRosterWorkbook(rows), { type: "buffer" });
     const cell = workbook.Sheets["명단"]["C2"];
