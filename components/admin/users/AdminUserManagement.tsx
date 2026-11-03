@@ -30,7 +30,8 @@ export function AdminUserManagement({ initial }: { initial: AdminRosterPage }) {
   const [importMessage, setImportMessage] = useState("");
 
   const selectedRoster = rows.find((row) => row.id === selectedRosterId) ?? null;
-  const allSelected = rows.length > 0 && rows.every((row) => selectedIds.has(row.id));
+  const selectableRows = rows.filter((row) => !row.isAdmin);
+  const allSelected = selectableRows.length > 0 && selectableRows.every((row) => selectedIds.has(row.id));
 
   async function loadRoster(reset: boolean) {
     const offset = reset ? 0 : nextOffset;
@@ -66,7 +67,7 @@ export function AdminUserManagement({ initial }: { initial: AdminRosterPage }) {
   }
 
   function toggleAll(checked: boolean) {
-    setSelectedIds(checked ? new Set(rows.map((row) => row.id)) : new Set());
+    setSelectedIds(checked ? new Set(selectableRows.map((row) => row.id)) : new Set());
   }
 
   function openCreate() {
@@ -94,7 +95,13 @@ export function AdminUserManagement({ initial }: { initial: AdminRosterPage }) {
       await loadRoster(true);
     } catch (cause) {
       const code = cause instanceof Error ? cause.message : "REQUEST_FAILED";
-      setError(code === "CANNOT_DELETE_SELF" ? "현재 로그인한 관리자 본인은 삭제할 수 없습니다." : code);
+      setError(
+        code === "CANNOT_DELETE_SELF"
+          ? "현재 로그인한 관리자 본인은 삭제할 수 없습니다."
+          : code === "CANNOT_DELETE_ADMIN"
+            ? "관리자는 삭제할 수 없습니다. 먼저 수정에서 관리자 권한을 해제해 주세요."
+            : code,
+      );
     } finally {
       setBusy(false);
     }
@@ -178,7 +185,12 @@ export function AdminUserManagement({ initial }: { initial: AdminRosterPage }) {
       }
       window.location.reload();
     } catch (cause) {
-      setError(cause instanceof Error ? cause.message : "명단을 저장하지 못했습니다.");
+      const code = cause instanceof Error ? cause.message : "";
+      setError(
+        code === "ADMIN_REQUIRED"
+          ? "마지막 관리자는 권한 해제나 로그인 제한을 할 수 없습니다. 다른 관리자를 먼저 지정해 주세요."
+          : code || "명단을 저장하지 못했습니다.",
+      );
       setBusy(false);
     }
   }
@@ -255,7 +267,7 @@ export function AdminUserManagement({ initial }: { initial: AdminRosterPage }) {
           {rows.map((row) => (
             <div className="admin-row roster-row" key={row.id}>
               <span className="roster-select-cell">
-                <input type="checkbox" checked={selectedIds.has(row.id)} onChange={(event) => toggle(row.id, event.target.checked)} aria-label={row.name + " 선택"} />
+                <input type="checkbox" checked={selectedIds.has(row.id)} disabled={row.isAdmin} title={row.isAdmin ? "관리자는 권한을 해제한 뒤 삭제할 수 있습니다." : undefined} onChange={(event) => toggle(row.id, event.target.checked)} aria-label={row.name + " 선택"} />
               </span>
               <span><strong>{row.name}</strong>{row.isAdmin && <small>관리자</small>}</span>
               <span>{row.position ?? "미지정"}</span>

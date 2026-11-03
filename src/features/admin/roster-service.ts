@@ -81,6 +81,31 @@ export function assertActorNotSelectedForDeletion(
   }
 }
 
+export function assertNoAdminSelectedForDeletion(
+  targets: Array<{ id: string; isAdmin: boolean }>,
+): void {
+  if (targets.some((target) => target.isAdmin)) {
+    throw new DomainError("CANNOT_DELETE_ADMIN", 409);
+  }
+}
+
+export function assertAdminRemains({
+  wasAdmin,
+  willBeAdmin,
+  willBeActive,
+  otherActiveAdmins,
+}: {
+  wasAdmin: boolean;
+  willBeAdmin: boolean;
+  willBeActive: boolean;
+  otherActiveAdmins: number;
+}): void {
+  const losesAdmin = wasAdmin && (!willBeAdmin || !willBeActive);
+  if (losesAdmin && otherActiveAdmins === 0) {
+    throw new DomainError("ADMIN_REQUIRED", 409);
+  }
+}
+
 function optionalText(value: string | null): string | null {
   const normalized = value?.trim().normalize("NFC") ?? "";
   return normalized || null;
@@ -280,11 +305,32 @@ export async function updateRosterMember(
         canonicalName: memberRoster.canonicalName,
         phoneLookupHash: memberRoster.phoneLookupHash,
         isActive: memberRoster.isActive,
+        isAdmin: memberRoster.isAdmin,
       })
       .from(memberRoster)
       .where(eq(memberRoster.id, id))
       .limit(1);
     if (!existing) throw new DomainError("ROSTER_NOT_FOUND", 404);
+
+    if (existing.isAdmin && (!values.isAdmin || !values.isActive)) {
+      const others = await tx
+        .select({ id: memberRoster.id })
+        .from(memberRoster)
+        .where(
+          and(
+            eq(memberRoster.isAdmin, true),
+            eq(memberRoster.isActive, true),
+            ne(memberRoster.id, id),
+          ),
+        )
+        .limit(1);
+      assertAdminRemains({
+        wasAdmin: existing.isAdmin,
+        willBeAdmin: values.isAdmin,
+        willBeActive: values.isActive,
+        otherActiveAdmins: others.length,
+      });
+    }
 
     if (values.phoneLookupHash) {
       const [duplicate] = await tx
@@ -460,6 +506,11 @@ export async function deleteRosterMembers(
     .where(inArray(users.rosterId, rosterIds));
 
   assertActorNotSelectedForDeletion(linkedUsers, actingUserId);
+  const targets = await db
+    .select({ id: memberRoster.id, isAdmin: memberRoster.isAdmin })
+    .from(memberRoster)
+    .where(inArray(memberRoster.id, rosterIds));
+  assertNoAdminSelectedForDeletion(targets);
   const userIds = linkedUsers.map((row) => row.id);
 
   return db.transaction(async (tx) => {
