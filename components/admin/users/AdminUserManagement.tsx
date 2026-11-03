@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, useState } from "react";
+import { RosterImportPanel } from "./RosterImportPanel";
 import type {
   AdminRosterPage,
   AdminRosterRow,
@@ -26,9 +27,7 @@ export function AdminUserManagement({ initial }: { initial: AdminRosterPage }) {
   const [selectedRosterId, setSelectedRosterId] = useState<string | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [busy, setBusy] = useState(false);
-  const [importBusy, setImportBusy] = useState(false);
   const [exportBusy, setExportBusy] = useState(false);
-  const [importMessage, setImportMessage] = useState("");
 
   const selectedRoster = rows.find((row) => row.id === selectedRosterId) ?? null;
   const selectableRows = rows.filter((row) => !row.isAdmin);
@@ -150,38 +149,6 @@ export function AdminUserManagement({ initial }: { initial: AdminRosterPage }) {
     }
   }
 
-  async function submitImport(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setError("");
-    setImportMessage("");
-    const form = event.currentTarget;
-    const data = new FormData(form);
-    const file = data.get("file");
-    if (!(file instanceof File) || !file.name) {
-      setError("가져올 .xls 파일을 선택해 주세요.");
-      return;
-    }
-
-    setImportBusy(true);
-    try {
-      const response = await fetch("/api/admin/roster/import", {
-        method: "POST",
-        body: data,
-      });
-      const body = await response.json().catch(() => ({}));
-      if (!response.ok || !body.summary) throw new Error(body.code ?? "ROSTER_IMPORT_FAILED");
-      setImportMessage(
-        "명단 " + body.summary.imported + "명 가져오기 완료 · 전화번호 없음 " + body.summary.missingPhone + "명",
-      );
-      form.reset();
-      await loadRoster(true);
-    } catch (cause) {
-      setError(cause instanceof Error ? "명단 가져오기 실패: " + cause.message : "명단을 가져오지 못했습니다.");
-    } finally {
-      setImportBusy(false);
-    }
-  }
-
   async function submitRoster(formData: FormData) {
     const newPassword = String(formData.get("password") ?? "");
     const payload = {
@@ -238,32 +205,24 @@ export function AdminUserManagement({ initial }: { initial: AdminRosterPage }) {
       {error && <p className="error-text" role="alert">{error}</p>}
 
       <section className="card admin-section">
-        <form className="roster-import-form" onSubmit={submitImport}>
-          <div>
-            <strong>삼덕청년부 명단 가져오기</strong>
-            <p className="helper-text">.xls 또는 .xlsx 파일을 가져옵니다. 예제의 이름 · 교회직분 · 핸드폰 · 마을 · 샘 열을 유지하고, 현재 관리자도 명단에 포함해 주세요. 기존 기도기록은 유지됩니다.</p>
-            <a className="text-button" href="/templates/community-roster-example.xlsx" download="삼덕청년부-명단-예제.xlsx">삼덕청년부 명단 엑셀 예제 다운로드</a>
-            <button className="text-button" type="button" disabled={exportBusy} onClick={() => void downloadRoster()}>
-              {exportBusy ? "명단 만드는 중..." : "현재 명단 엑셀로 내려받기"}
-            </button>
-            <p className="helper-text">
-              현재 명단 전체(엑셀로 가져온 성도와 직접 추가·가입 신청으로 들어온 성도)를 같은 형식의 엑셀로 내려받습니다. 전화번호가 들어 있으니 안전하게 보관하세요.
-              이 파일을 다시 가져올 때는 직접 추가하거나 가입 신청으로 승인한 성도를 파일에서 지워야 오류 없이 올라갑니다.
-            </p>
-          </div>
-          <input
-            name="file"
-            type="file"
-            accept=".xls,.xlsx,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-            aria-label="삼덕청년부 엑셀 파일"
-            required
-            disabled={importBusy}
-          />
-          <button className="text-button" type="submit" disabled={importBusy}>
-            {importBusy ? "가져오는 중..." : "명단 가져오기"}
-          </button>
-        </form>
-        {importMessage && <p className="success-text" role="status">{importMessage}</p>}
+        <RosterImportPanel
+          accept=".xls,.xlsx,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+          ariaLabel="삼덕청년부 엑셀 파일"
+          helper="엑셀(.xls, .xlsx)로 명단을 가져옵니다. 이름 · 교회직분 · 핸드폰 · 마을 · 샘 열을 사용합니다. 가져오기는 새 사람을 추가하고 기존 사람의 직분·마을·샘을 채울 뿐, 삭제하지 않습니다. 먼저 미리보기로 확인할 수 있습니다."
+          extra={
+            <>
+              <a className="text-button" href="/templates/community-roster-example.xlsx" download="삼덕청년부-명단-예제.xlsx">삼덕청년부 명단 엑셀 예제 다운로드</a>
+              <button className="text-button" type="button" disabled={exportBusy} onClick={() => void downloadRoster()}>
+                {exportBusy ? "명단 만드는 중..." : "현재 명단 엑셀로 내려받기"}
+              </button>
+              <p className="helper-text">
+                현재 명단 전체(엑셀로 가져온 성도와 직접 추가·가입 신청으로 들어온 성도)를 같은 형식의 엑셀로 내려받습니다. 전화번호가 들어 있으니 안전하게 보관하세요.
+                내려받은 파일에 사람을 추가해 그대로 다시 가져올 수 있습니다.
+              </p>
+            </>
+          }
+          onImported={() => loadRoster(true)}
+        />
 
         <details className="roster-disclosure">
         <summary>사용자 명단 · 현재 {rows.length}명 표시</summary>

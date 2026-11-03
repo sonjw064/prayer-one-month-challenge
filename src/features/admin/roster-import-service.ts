@@ -2,7 +2,9 @@ import { DomainError } from "../../lib/http";
 import {
   importRosterCandidates,
   parseRosterWorkbookBuffer,
+  previewRosterImport,
   type ImportSummary,
+  type RosterImportPreview,
   type RosterImportRepository,
 } from "../roster/import";
 
@@ -25,19 +27,20 @@ export function validateRosterUploadMeta({
 
 export async function importRosterUploadBuffer({
   buffer,
-  adminCredential,
   repository,
 }: {
   buffer: Buffer;
-  adminCredential: {
-    canonicalName: string;
-    phoneLookupHash: string;
-  };
   repository?: RosterImportRepository;
 }): Promise<ImportSummary> {
-  const rows = parseRosterWorkbookBuffer(buffer);
-  return importRosterCandidates(rows, {
-    adminCredential,
-    repository,
-  });
+  return importRosterCandidates(parseRosterWorkbookBuffer(buffer), { repository });
+}
+
+export async function previewRosterUploadBuffer({
+  buffer,
+  repository,
+}: {
+  buffer: Buffer;
+  repository?: RosterImportRepository;
+}): Promise<RosterImportPreview> {
+  return previewRosterImport(parseRosterWorkbookBuffer(buffer), { repository });
 }

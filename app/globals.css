@@ -1396,3 +1396,10 @@ button.evcal-cell:hover { background: #f3f4f6; }
 .signup-recent li { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
 .admin-hub-link { position: relative; }
 .admin-hub-link .nav-badge { margin-left: 8px; }
+
+/* Roster import preview */
+.roster-import-preview { margin-top: 12px; padding: 16px; border: 1px solid #e5e7eb; border-radius: 16px; background: #f8fafc; display: grid; gap: 10px; }
+.roster-import-preview h3 { margin: 0; }
+.roster-import-counts { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+.roster-import-preview details ul { margin: 6px 0 0; padding-left: 20px; display: grid; gap: 2px; }
+.roster-import-preview summary { cursor: pointer; font-weight: 600; }
