@@ -9,6 +9,7 @@ import {
   pgSchema,
   primaryKey,
   text,
+  time,
   timestamp,
   uniqueIndex,
   uuid,
@@ -342,4 +343,22 @@ export const googleCalendarConnections = appSchema.table(
   () => [
     uniqueIndex("google_calendar_single_connection_uq").on(sql`true`),
   ],
+);
+
+export const calendarEvents = appSchema.table(
+  "calendar_events",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    title: text("title").notNull(),
+    description: text("description").notNull().default(""),
+    location: text("location").notNull().default(""),
+    startDate: date("start_date").notNull(),
+    endDate: date("end_date").notNull(),
+    startTime: time("start_time"),
+    endTime: time("end_time"),
+    createdBy: uuid("created_by").references(() => users.id, { onDelete: "set null" }),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index("calendar_events_dates_idx").on(t.startDate, t.endDate)],
 );

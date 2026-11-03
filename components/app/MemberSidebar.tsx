@@ -8,6 +8,7 @@ import { UnreadNoticeBadge } from "../notices/UnreadNoticeBadge";
 const memberNav = [
   { href: "/notices", label: "공지", icon: "🔔" },
   { href: "/", label: "기도운동", icon: "🙏" },
+  { href: "/calendar", label: "일정", icon: "📅" },
   { href: "/visits", label: "심방신청", icon: "♡" },
   { href: "/prayer-requests", label: "기도요청", icon: "♥" },
   { href: "/community", label: "커뮤니티", icon: "💬" },

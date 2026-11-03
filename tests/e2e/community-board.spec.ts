@@ -9,7 +9,7 @@ test("community stays private in notice-first member navigation", async ({ page,
   await expect(page.getByRole("heading", { name: "커뮤니티", exact: true })).toBeVisible();
   const menu = page.getByRole("navigation", { name: "3D 메뉴" });
   const labels = await menu.locator("a").allTextContents();
-  const expected = ["공지", "기도운동", "심방신청", "기도요청", "커뮤니티"];
+  const expected = ["공지", "기도운동", "일정", "심방신청", "기도요청", "커뮤니티"];
   expected.forEach((label, index) => expect(labels[index]).toContain(label));
   const folders = await page.request.get("/api/community/folders");
   expect(folders.ok()).toBe(true);

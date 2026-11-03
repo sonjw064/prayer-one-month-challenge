@@ -1336,3 +1336,44 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 /* Dashboard pagination keeps the oldest activities on later pages. */
 .admin-activity-pagination { display:flex; flex-wrap:wrap; justify-content:center; align-items:center; gap:.75rem; margin-top:1rem; }
 .admin-activity-pagination span { text-align:center; font-size:.9rem; }
+
+/* Community calendar */
+.evcal { display: grid; gap: 16px; }
+.evcal-card h3 { margin: 0 0 10px; }
+.evcal-head { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+.evcal-head h3 { margin: 0; flex: 1; text-align: center; }
+.evcal-nav { min-width: 44px; min-height: 44px; font-size: 1.6rem; text-align: center; }
+.evcal-today { min-height: 44px; font-weight: 700; }
+.evcal-grid { display: grid; gap: 4px; }
+.evcal-row { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; }
+.evcal-weekdays span { text-align: center; font-size: .85rem; font-weight: 700; color: #6b7280; padding: 4px 0; }
+.evcal-weekdays .is-sunday, .evcal-cell.is-sunday .evcal-day { color: #b42318; }
+.evcal-cell {
+  display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 4px;
+  min-height: 52px; padding: 6px 2px; border: 1px solid transparent; border-radius: 12px;
+  background: transparent; font: inherit; cursor: pointer;
+}
+.evcal-cell.is-out { cursor: default; }
+button.evcal-cell:hover { background: #f3f4f6; }
+.evcal-cell.is-today { border-color: #253b32; }
+.evcal-cell.is-selected { background: #253b32; }
+.evcal-cell.is-selected .evcal-day { color: #fff; }
+.evcal-cell.is-selected .evcal-dots i { background: #fff; }
+.evcal-day { font-weight: 600; }
+.evcal-dots { display: flex; gap: 3px; min-height: 6px; }
+.evcal-dots i { width: 6px; height: 6px; border-radius: 50%; background: #253b32; }
+.evcal-event { display: grid; gap: 4px; padding: 12px 0; border-top: 1px solid #e5e7eb; }
+.evcal-event:first-of-type { border-top: 0; }
+.evcal-event-meta { display: flex; flex-wrap: wrap; gap: 4px 12px; margin: 0; color: #4b5563; font-size: .92rem; }
+.evcal-event-description { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+.evcal-upcoming { list-style: none; margin: 0; padding: 0; }
+.evcal-upcoming li + li { border-top: 1px solid #e5e7eb; }
+.evcal-upcoming-row {
+  display: grid; gap: 2px; width: 100%; padding: 12px 4px; border: 0; background: transparent;
+  text-align: left; font: inherit; cursor: pointer; border-radius: 12px;
+}
+.evcal-upcoming-row:hover { background: #f8fafc; }
+.evcal-upcoming-date { font-size: .85rem; font-weight: 700; color: #253b32; }
+.evcal-time-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.evcal-past { margin-top: 16px; }
+.evcal-past summary { cursor: pointer; font-weight: 600; padding: 8px 0; }
