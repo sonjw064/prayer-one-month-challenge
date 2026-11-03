@@ -1,6 +1,6 @@
 import { reconcileUnboundLeaders } from "../sams/identity-service";
 import * as fs from "node:fs";
-import { and, eq } from "drizzle-orm";
+import { eq, isNull } from "drizzle-orm";
 import * as XLSX from "xlsx";
 import * as cptable from "xlsx/dist/cpexcel.full.mjs";
 
@@ -54,15 +54,69 @@ export type PreparedRosterRow = {
 };
 
 export type ImportSummary = {
+  /** Rows read from the file. */
   total: number;
-  imported: number;
+  added: number;
+  /** Existing people whose position/village/sam changed. */
+  updated: number;
+  unchanged: number;
+  /** Rows skipped because the person could not be identified safely. */
+  skipped: number;
+  /** Existing roster entries that are not in the file (they are kept as they are). */
+  notInFile: number;
   missingPhone: number;
-  errors: number;
+};
+
+export type ExistingRosterRow = {
+  id: string;
+  canonicalName: string;
+  phoneLookupHash: string | null;
+  position: string | null;
+  village: string | null;
+  sam: string | null;
+  samLabel: string | null;
+  isActive: boolean;
+  isAdmin: boolean;
+};
+
+export type RosterChange = {
+  field: "position" | "village" | "sam";
+  before: string | null;
+  after: string;
+};
+
+export type PlannedUpdate = {
+  existing: ExistingRosterRow;
+  values: {
+    position: string | null;
+    village: string | null;
+    sam: string | null;
+    samLabel: string | null;
+  };
+  changes: RosterChange[];
+  /** The file marks this person as the initial administrator (promote only, never demote). */
+  promote: boolean;
+};
+
+export type RosterImportPlan = {
+  adds: PreparedRosterRow[];
+  updates: PlannedUpdate[];
+  unchanged: Array<{ existing: ExistingRosterRow }>;
+  skipped: PreparedRosterRow[];
+  notInFile: number;
 };
 
 export type RosterImportRepository = {
-  replaceXlsRoster(rows: PreparedRosterRow[]): Promise<void>;
+  loadRoster(): Promise<ExistingRosterRow[]>;
+  /** Applies the plan in one transaction and returns what was done. */
+  applyRoster(rows: PreparedRosterRow[]): Promise<RosterImportPlan>;
 };
+
+export class RosterValidationError extends Error {
+  constructor(public errors: ImportValidationError[]) {
+    super("ROSTER_VALIDATION_FAILED");
+  }
+}
 
 const HEADER_ALIASES = {
   name: ["이름"],
@@ -189,182 +243,225 @@ function credentialKey(name: string, hash: string): string {
   return `${name}\u0000${hash}`;
 }
 
-export const dbRosterImportRepository: RosterImportRepository = {
-  async replaceXlsRoster(rows) {
-    const db = getDb();
+/**
+ * Decides what an upload would do. Uploading never deletes anyone and never touches
+ * administrator or active state; it only adds people and fills in position/village/sam.
+ * Blank cells in the file never erase existing values.
+ */
+export function planRosterImport(
+  existing: ExistingRosterRow[],
+  prepared: PreparedRosterRow[],
+): RosterImportPlan {
+  const byCredential = new Map<string, ExistingRosterRow>();
+  const phonelessByName = new Map<string, ExistingRosterRow[]>();
+  for (const row of existing) {
+    if (row.phoneLookupHash) {
+      byCredential.set(credentialKey(row.canonicalName, row.phoneLookupHash), row);
+    } else {
+      const list = phonelessByName.get(row.canonicalName) ?? [];
+      list.push(row);
+      phonelessByName.set(row.canonicalName, list);
+    }
+  }
+  const phonelessInFile = new Map<string, number>();
+  for (const row of prepared) {
+    if (!row.phoneLookupHash) {
+      phonelessInFile.set(row.canonicalName, (phonelessInFile.get(row.canonicalName) ?? 0) + 1);
+    }
+  }
 
-    await db.transaction(async (tx) => {
-      const existingRows = await tx
-        .select({
-          id: memberRoster.id,
-          canonicalName: memberRoster.canonicalName,
-          phoneLookupHash: memberRoster.phoneLookupHash,
-          source: memberRoster.source,
-        })
-        .from(memberRoster);
+  const plan: RosterImportPlan = { adds: [], updates: [], unchanged: [], skipped: [], notInFile: 0 };
+  const matchedIds = new Set<string>();
 
-      const existingXls = existingRows.filter((row) => row.source === "xls");
-      const existingAdminKeys = new Set(
-        existingRows
-          .filter((row) => row.source === "admin" && row.phoneLookupHash)
-          .map((row) => credentialKey(row.canonicalName, row.phoneLookupHash!)),
-      );
-
-      for (const row of rows) {
-        if (
-          row.phoneLookupHash &&
-          existingAdminKeys.has(credentialKey(row.canonicalName, row.phoneLookupHash))
-        ) {
-          throw new Error("ROSTER_ADMIN_CONFLICT");
-        }
+  for (const row of prepared) {
+    let match: ExistingRosterRow | undefined;
+    if (row.phoneLookupHash) {
+      match = byCredential.get(credentialKey(row.canonicalName, row.phoneLookupHash));
+    } else {
+      // Without a phone number the name is the only identity: match only when it is unambiguous.
+      const candidates = phonelessByName.get(row.canonicalName) ?? [];
+      if ((phonelessInFile.get(row.canonicalName) ?? 0) > 1 || candidates.length > 1) {
+        plan.skipped.push(row);
+        continue;
       }
+      match = candidates[0];
+    }
 
-      const existingByCredential = new Map(
-        existingXls
-          .filter((row) => row.phoneLookupHash)
-          .map((row) => [
-            credentialKey(row.canonicalName, row.phoneLookupHash!),
-            row.id,
-          ]),
-      );
+    if (!match) {
+      plan.adds.push(row);
+      continue;
+    }
+    matchedIds.add(match.id);
 
-      const linkedUsers = await tx
-        .select({
-          id: users.id,
-          displayName: users.displayName,
-          phoneLookupHash: users.phoneLookupHash,
-          rosterId: users.rosterId,
-          isActive: users.isActive,
-        })
-        .from(users);
-      const linkedRosterIds = new Set(
-        linkedUsers.flatMap((row) => (row.rosterId ? [row.rosterId] : [])),
-      );
+    const position = row.position ?? match.position;
+    const village = row.village ?? match.village;
+    const sam = row.sam ?? match.sam;
+    const changes: RosterChange[] = [];
+    if (position !== match.position) changes.push({ field: "position", before: match.position, after: position! });
+    if (village !== match.village) changes.push({ field: "village", before: match.village, after: village! });
+    if (sam !== match.sam) changes.push({ field: "sam", before: match.sam, after: sam! });
+    const promote = row.isAdmin && !match.isAdmin;
 
-      const processedIds = new Set<string>();
-      const importedByCredential = new Map<
+    if (changes.length === 0 && !promote) {
+      plan.unchanged.push({ existing: match });
+    } else {
+      plan.updates.push({
+        existing: match,
+        values: { position, village, sam, samLabel: makeSamLabel(village, sam) },
+        changes,
+        promote,
+      });
+    }
+  }
+
+  plan.notInFile = existing.filter((row) => !matchedIds.has(row.id)).length;
+  return plan;
+}
+
+function summarize(plan: RosterImportPlan, total: number, missingPhone: number): ImportSummary {
+  return {
+    total,
+    added: plan.adds.length,
+    updated: plan.updates.length,
+    unchanged: plan.unchanged.length,
+    skipped: plan.skipped.length,
+    notInFile: plan.notInFile,
+    missingPhone,
+  };
+}
+
+const existingColumns = {
+  id: memberRoster.id,
+  canonicalName: memberRoster.canonicalName,
+  phoneLookupHash: memberRoster.phoneLookupHash,
+  position: memberRoster.position,
+  village: memberRoster.village,
+  sam: memberRoster.sam,
+  samLabel: memberRoster.samLabel,
+  isActive: memberRoster.isActive,
+  isAdmin: memberRoster.isAdmin,
+};
+
+export const dbRosterImportRepository: RosterImportRepository = {
+  async loadRoster() {
+    return getDb().select(existingColumns).from(memberRoster);
+  },
+
+  async applyRoster(rows) {
+    return getDb().transaction(async (tx) => {
+      const existing = await tx.select(existingColumns).from(memberRoster);
+      const plan = planRosterImport(existing, rows);
+
+      // People who can be matched to older login accounts that are not linked to a roster row yet.
+      const rosterByCredential = new Map<
         string,
-        { id: string; row: PreparedRosterRow }
+        { id: string; name: string; hash: string; isAdmin: boolean; isActive: boolean }
       >();
 
-      for (const row of rows) {
-        const key = row.phoneLookupHash
-          ? credentialKey(row.canonicalName, row.phoneLookupHash)
-          : null;
-        const existingId = key ? existingByCredential.get(key) : undefined;
-
-        if (existingId) {
-          await tx
-            .update(memberRoster)
-            .set({
-              sourceName: row.sourceName,
-              canonicalName: row.canonicalName,
-              position: row.position,
-              phoneLookupHash: row.phoneLookupHash,
-              phoneCiphertext: row.phoneCiphertext,
-              village: row.village,
-              sam: row.sam,
-              samLabel: row.samLabel,
-              isActive: row.isActive,
-              isAdmin: row.isAdmin,
-              sourceRow: row.sourceRow,
-              updatedAt: new Date(),
-            })
-            .where(eq(memberRoster.id, existingId));
-          processedIds.add(existingId);
-          if (key) importedByCredential.set(key, { id: existingId, row });
-          continue;
-        }
-
+      for (const row of plan.adds) {
         const [inserted] = await tx
           .insert(memberRoster)
           .values(row)
           .returning({ id: memberRoster.id });
-        processedIds.add(inserted.id);
-        if (key) importedByCredential.set(key, { id: inserted.id, row });
-      }
-
-      for (const oldRow of existingXls) {
-        if (!processedIds.has(oldRow.id) && !linkedRosterIds.has(oldRow.id)) {
-          await tx.delete(memberRoster).where(eq(memberRoster.id, oldRow.id));
+        if (row.phoneLookupHash) {
+          rosterByCredential.set(credentialKey(row.canonicalName, row.phoneLookupHash), {
+            id: inserted.id,
+            name: row.canonicalName,
+            hash: row.phoneLookupHash,
+            isAdmin: row.isAdmin,
+            isActive: row.isActive,
+          });
         }
       }
 
-      for (const user of linkedUsers) {
-        if (user.rosterId) continue;
-        const canonicalName = canonicalizeRosterName(user.displayName);
-        const match = importedByCredential.get(
-          credentialKey(canonicalName, user.phoneLookupHash),
-        );
+      for (const update of plan.updates) {
+        await tx
+          .update(memberRoster)
+          .set({
+            ...update.values,
+            ...(update.promote ? { isAdmin: true } : {}),
+            updatedAt: new Date(),
+          })
+          .where(eq(memberRoster.id, update.existing.id));
+      }
+
+      for (const entry of [
+        ...plan.updates.map((update) => ({ ...update.existing, isAdmin: update.existing.isAdmin || update.promote })),
+        ...plan.unchanged.map((item) => item.existing),
+      ]) {
+        if (!entry.phoneLookupHash) continue;
+        rosterByCredential.set(credentialKey(entry.canonicalName, entry.phoneLookupHash), {
+          id: entry.id,
+          name: entry.canonicalName,
+          hash: entry.phoneLookupHash,
+          isAdmin: entry.isAdmin,
+          isActive: entry.isActive,
+        });
+      }
+
+      const unlinkedUsers = await tx
+        .select({ id: users.id, displayName: users.displayName, phoneLookupHash: users.phoneLookupHash })
+        .from(users)
+        .where(isNull(users.rosterId));
+      for (const user of unlinkedUsers) {
+        let canonicalName: string;
+        try {
+          canonicalName = canonicalizeRosterName(user.displayName);
+        } catch {
+          continue;
+        }
+        const match = rosterByCredential.get(credentialKey(canonicalName, user.phoneLookupHash));
         if (!match) continue;
 
         await tx
           .update(users)
           .set({
             rosterId: match.id,
-            displayName: match.row.canonicalName,
-            normalizedName: match.row.canonicalName.toLocaleLowerCase("ko-KR"),
-            phoneLookupHash: match.row.phoneLookupHash!,
-            role: match.row.isAdmin ? "admin" : "member",
-            isActive: match.row.isActive,
+            displayName: match.name,
+            normalizedName: match.name.toLocaleLowerCase("ko-KR"),
+            phoneLookupHash: match.hash,
+            role: match.isAdmin ? "admin" : "member",
+            isActive: match.isActive,
             updatedAt: new Date(),
           })
           .where(eq(users.id, user.id));
       }
 
-      const activeUsers = await tx
-        .select({ id: users.id, rosterId: users.rosterId })
-        .from(users)
-        .where(eq(users.isActive, true));
-
       await reconcileUnboundLeaders(tx);
-
-      if (activeUsers.some((row) => !row.rosterId)) {
-        throw new Error("UNMAPPED_ACTIVE_USER");
-      }
+      return plan;
     });
   },
 };
 
-export async function importRosterCandidates(
-  rows: ImportCandidate[],
-  options:
-    | {
-        adminName: string;
-        adminPhone: string;
-        adminCredential?: never;
-        repository?: RosterImportRepository;
-      }
-    | {
-        adminName?: never;
-        adminPhone?: never;
-        adminCredential: {
-          canonicalName: string;
-          phoneLookupHash: string;
-        };
-        repository?: RosterImportRepository;
-      },
-): Promise<ImportSummary> {
-  const validation = validateRosterCandidates(rows);
-  if (validation.errors.length > 0) {
-    throw new Error("ROSTER_VALIDATION_FAILED");
-  }
+type ImportOptions = {
+  /** Initial setup only: this person is marked as the administrator. */
+  adminName?: string;
+  adminPhone?: string;
+  adminCredential?: { canonicalName: string; phoneLookupHash: string };
+  repository?: RosterImportRepository;
+};
 
-  const rawAdmin =
-    "adminCredential" in options && options.adminCredential
+function prepareRows(
+  rows: ImportCandidate[],
+  options: ImportOptions,
+): { prepared: PreparedRosterRow[]; adminProvided: boolean; adminMatches: number } {
+  const rawAdmin = options.adminCredential
+    ? {
+        canonicalName: canonicalizeRosterName(options.adminCredential.canonicalName),
+        phoneLookupHash: options.adminCredential.phoneLookupHash,
+      }
+    : options.adminName && options.adminPhone
       ? {
-          canonicalName: canonicalizeRosterName(options.adminCredential.canonicalName),
-          phoneLookupHash: options.adminCredential.phoneLookupHash,
-        }
-      : {
           canonicalName: canonicalizeRosterName(options.adminName),
           phoneLookupHash: phoneLookupHash(normalizeRosterPhone(options.adminPhone)),
-        };
+        }
+      : null;
   let adminMatches = 0;
 
-  const prepared: PreparedRosterRow[] = rows.map((row) => {
+  const prepared = rows.map((row): PreparedRosterRow => {
     const lookupHash = row.phone ? phoneLookupHash(row.phone) : null;
     const isAdmin =
+      rawAdmin !== null &&
       row.canonicalName === rawAdmin.canonicalName &&
       lookupHash !== null &&
       lookupHash === rawAdmin.phoneLookupHash;
@@ -382,18 +479,66 @@ export async function importRosterCandidates(
       samLabel: row.samLabel,
       isActive: true,
       isAdmin,
-      source: "xls" as const,
+      source: "xls",
     };
   });
 
-  if (adminMatches !== 1) throw new Error("INITIAL_ADMIN_NOT_FOUND");
+  return { prepared, adminProvided: rawAdmin !== null, adminMatches };
+}
 
-  await (options.repository ?? dbRosterImportRepository).replaceXlsRoster(prepared);
+function validateOrThrow(rows: ImportCandidate[]): ImportValidation {
+  const validation = validateRosterCandidates(rows);
+  if (validation.errors.length > 0) throw new RosterValidationError(validation.errors);
+  return validation;
+}
+
+export type RosterImportPreview = {
+  summary: ImportSummary;
+  /** First entries only; the summary has the full counts. */
+  added: Array<{ name: string }>;
+  updated: Array<{ name: string; changes: string[] }>;
+  skipped: Array<{ name: string; sourceRow: number }>;
+};
+
+export const PREVIEW_LIST_LIMIT = 30;
+
+const FIELD_LABELS = { position: "직분", village: "마을", sam: "샘" } as const;
+
+export function describeRosterChange(change: RosterChange): string {
+  return `${FIELD_LABELS[change.field]}: ${change.before ?? "없음"} → ${change.after}`;
+}
+
+/** Shows what an upload would do without changing anything. */
+export async function previewRosterImport(
+  rows: ImportCandidate[],
+  options: { repository?: RosterImportRepository } = {},
+): Promise<RosterImportPreview> {
+  const validation = validateOrThrow(rows);
+  const { prepared } = prepareRows(rows, {});
+  const repository = options.repository ?? dbRosterImportRepository;
+  const plan = planRosterImport(await repository.loadRoster(), prepared);
 
   return {
-    total: rows.length,
-    imported: prepared.length,
-    missingPhone: validation.missingPhone,
-    errors: 0,
+    summary: summarize(plan, rows.length, validation.missingPhone),
+    added: plan.adds.slice(0, PREVIEW_LIST_LIMIT).map((row) => ({ name: row.sourceName })),
+    updated: plan.updates.slice(0, PREVIEW_LIST_LIMIT).map((update) => ({
+      name: update.existing.canonicalName,
+      changes: update.changes.map(describeRosterChange),
+    })),
+    skipped: plan.skipped
+      .slice(0, PREVIEW_LIST_LIMIT)
+      .map((row) => ({ name: row.sourceName, sourceRow: row.sourceRow })),
   };
+}
+
+export async function importRosterCandidates(
+  rows: ImportCandidate[],
+  options: ImportOptions = {},
+): Promise<ImportSummary> {
+  const validation = validateOrThrow(rows);
+  const { prepared, adminProvided, adminMatches } = prepareRows(rows, options);
+  if (adminProvided && adminMatches !== 1) throw new Error("INITIAL_ADMIN_NOT_FOUND");
+
+  const plan = await (options.repository ?? dbRosterImportRepository).applyRoster(prepared);
+  return summarize(plan, rows.length, validation.missingPhone);
 }

@@ -7,7 +7,8 @@ describe("split admin management", () => {
       "components/admin/users/AdminUserManagement.tsx",
       "utf8",
     );
-    expect(source).toContain("/api/admin/roster/import");
+    expect(source).toContain("RosterImportPanel");
+    expect(readFileSync("components/admin/users/RosterImportPanel.tsx", "utf8")).toContain("/api/admin/roster/import");
     expect(source).toContain('method: "DELETE"');
     expect(source).toContain("/api/admin/roster/password");
   });
