@@ -1403,3 +1403,29 @@ button.evcal-cell:hover { background: #f3f4f6; }
 .roster-import-counts { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
 .roster-import-preview details ul { margin: 6px 0 0; padding-left: 20px; display: grid; gap: 2px; }
 .roster-import-preview summary { cursor: pointer; font-weight: 600; }
+
+/* Sam attendance */
+.att { display: grid; gap: 16px; }
+.att-controls { display: flex; flex-wrap: wrap; align-items: end; gap: 12px 16px; }
+.att-controls label { display: grid; gap: 6px; min-width: 140px; }
+.att-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.att-head h3 { margin: 0; }
+.att-summary { margin: 8px 0 4px; font-weight: 700; }
+.att-list { list-style: none; margin: 8px 0 0; padding: 0; }
+.att-row { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 12px; padding: 10px 0; border-top: 1px solid #e5e7eb; }
+.att-row:first-child { border-top: 0; }
+.att-name { font-weight: 600; overflow-wrap: anywhere; }
+.att-choices { display: flex; gap: 6px; }
+.att-choice {
+  min-width: 64px; min-height: 44px; padding: 0 12px; border: 1px solid #d1d5db; border-radius: 12px;
+  background: #fff; font: inherit; font-weight: 600; cursor: pointer;
+}
+.att-choice.is-on.is-present { background: #166534; border-color: #166534; color: #fff; }
+.att-choice.is-on.is-absent { background: #b42318; border-color: #b42318; color: #fff; }
+.att-choice.is-on.is-worship_only { background: #92400e; border-color: #92400e; color: #fff; }
+.att-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-top: 16px; }
+@media (max-width: 430px) {
+  .att-row { align-items: stretch; flex-direction: column; }
+  .att-choices { width: 100%; }
+  .att-choice { flex: 1; }
+}

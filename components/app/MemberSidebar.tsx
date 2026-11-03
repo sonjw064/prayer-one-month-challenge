@@ -13,6 +13,7 @@ const memberNav = [
   { href: "/prayer-requests", label: "기도요청", icon: "♥" },
   { href: "/community", label: "커뮤니티", icon: "💬" },
   { href: "/pastoral-reports", label: "목양지", icon: "📝" },
+  { href: "/attendance", label: "샘원 관리", icon: "✅" },
 ] as const;
 
 function isActive(pathname: string, href: string) {
@@ -26,7 +27,9 @@ export function MemberSidebar({ onNavigate, unreadCount, pastoralVisible = false
     <nav className="member-nav" aria-label="3D 메뉴">
       {memberNav.filter(item =>
         (item.href !== "/" || prayerMenuEnabled) &&
-        (item.href !== "/pastoral-reports" || pastoralVisible)).map((item) => {
+        (item.href !== "/pastoral-reports" || pastoralVisible) &&
+        // Same people as the pastoral report tab: sam leaders, village heads and administrators.
+        (item.href !== "/attendance" || pastoralVisible)).map((item) => {
         const active = isActive(pathname, item.href);
         return (
           <Link key={item.href} href={item.href} className={`member-nav-link${active ? " is-active" : ""}`} aria-current={active ? "page" : undefined} onClick={onNavigate}>

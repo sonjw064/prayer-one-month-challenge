@@ -16,11 +16,16 @@ export async function directory(db: Executor = getDb()) {
   });
   return { roster, sams, heads };
 }
-export async function reportAccess(actor: Actor, db: Executor = getDb()) {
+/** Same as `reportAccess`, but also returns the roster that was loaded so callers need no second query. */
+export async function reportAccessWithRoster(actor: Actor, db: Executor = getDb()) {
   const [user] = await rows<{ rosterId: string | null }>(db, sql`select roster_id as "rosterId" from prayer_app.users where id=${actor.id} and is_active=true`);
   if (!user) throw new ReportError("UNAUTHORIZED", 401);
   const data = await directory(db);
-  return deriveAccess(actor, data.roster.find(r => r.id === user.rosterId) ?? null, data.sams, data.roster, data.heads);
+  const access = deriveAccess(actor, data.roster.find(r => r.id === user.rosterId) ?? null, data.sams, data.roster, data.heads);
+  return { access, roster: data.roster };
+}
+export async function reportAccess(actor: Actor, db: Executor = getDb()) {
+  return (await reportAccessWithRoster(actor, db)).access;
 }
 export async function requireReportAccess(actor: Actor, db: Executor = getDb()) {
   const access = await reportAccess(actor, db);
