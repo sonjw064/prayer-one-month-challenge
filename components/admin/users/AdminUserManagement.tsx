@@ -27,6 +27,7 @@ export function AdminUserManagement({ initial }: { initial: AdminRosterPage }) {
   const [modalOpen, setModalOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const [importBusy, setImportBusy] = useState(false);
+  const [exportBusy, setExportBusy] = useState(false);
   const [importMessage, setImportMessage] = useState("");
 
   const selectedRoster = rows.find((row) => row.id === selectedRosterId) ?? null;
@@ -78,6 +79,30 @@ export function AdminUserManagement({ initial }: { initial: AdminRosterPage }) {
   function openEdit(row: AdminRosterRow) {
     setSelectedRosterId(row.id);
     setModalOpen(true);
+  }
+
+  async function downloadRoster() {
+    if (exportBusy) return;
+    setExportBusy(true);
+    setError("");
+    try {
+      const response = await fetch("/api/admin/roster/export", { cache: "no-store" });
+      if (!response.ok) throw new Error("EXPORT_FAILED");
+      const blob = await response.blob();
+      const encoded = /filename\*=UTF-8''([^;]+)/.exec(response.headers.get("content-disposition") ?? "")?.[1];
+      const link = document.createElement("a");
+      const url = URL.createObjectURL(blob);
+      link.href = url;
+      link.download = encoded ? decodeURIComponent(encoded) : "삼덕청년부-명단.xlsx";
+      document.body.append(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    } catch {
+      setError("명단을 내려받지 못했습니다. 잠시 후 다시 시도해 주세요.");
+    } finally {
+      setExportBusy(false);
+    }
   }
 
   async function deleteSelected() {
@@ -218,6 +243,13 @@ export function AdminUserManagement({ initial }: { initial: AdminRosterPage }) {
             <strong>삼덕청년부 명단 가져오기</strong>
             <p className="helper-text">.xls 또는 .xlsx 파일을 가져옵니다. 예제의 이름 · 교회직분 · 핸드폰 · 마을 · 샘 열을 유지하고, 현재 관리자도 명단에 포함해 주세요. 기존 기도기록은 유지됩니다.</p>
             <a className="text-button" href="/templates/community-roster-example.xlsx" download="삼덕청년부-명단-예제.xlsx">삼덕청년부 명단 엑셀 예제 다운로드</a>
+            <button className="text-button" type="button" disabled={exportBusy} onClick={() => void downloadRoster()}>
+              {exportBusy ? "명단 만드는 중..." : "현재 명단 엑셀로 내려받기"}
+            </button>
+            <p className="helper-text">
+              현재 명단 전체(엑셀로 가져온 성도와 직접 추가·가입 신청으로 들어온 성도)를 같은 형식의 엑셀로 내려받습니다. 전화번호가 들어 있으니 안전하게 보관하세요.
+              이 파일을 다시 가져올 때는 직접 추가하거나 가입 신청으로 승인한 성도를 파일에서 지워야 오류 없이 올라갑니다.
+            </p>
           </div>
           <input
             name="file"
