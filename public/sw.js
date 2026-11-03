@@ -3,8 +3,8 @@ self.addEventListener("push", (event) => {
   event.waitUntil(
     self.registration.showNotification(data.title || "3D", {
       body: data.body || "",
-      icon: "/icons/56-heart-192.png",
-      badge: "/icons/56-heart-192.png",
+      icon: "/icons/3duks-192.png",
+      badge: "/icons/3duks-192.png",
       tag: data.tag,
       data: { url: data.url || "/notices" },
     }),

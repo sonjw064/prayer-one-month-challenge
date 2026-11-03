@@ -8,7 +8,7 @@ export default function PublicLayout({ children }: Readonly<{ children: React.Re
       <a className="public-skip" href="#public-main">본문으로 바로가기</a>
       <header className="public-header">
         <Link className="public-brand" href="/about">
-          <Image src="/icons/56-heart-192.png" alt="" width={48} height={48} unoptimized />
+          <Image src="/icons/3duks-192.png" alt="" width={48} height={48} unoptimized />
           <span><strong>3D</strong><small>삼덕청년부</small></span>
         </Link>
         <nav className="public-nav" aria-label="공개 안내 메뉴">

@@ -10,9 +10,9 @@ export default function manifest(): MetadataRoute.Manifest {
     background_color: "#ffffff",
     theme_color: "#ffffff",
     icons: [
-      { src: "/icons/56-heart-192.png", sizes: "192x192", type: "image/png" },
-      { src: "/icons/56-heart-512.png", sizes: "512x512", type: "image/png" },
-      { src: "/icons/56-heart-maskable-512.png", sizes: "512x512", type: "image/png", purpose: "maskable" },
+      { src: "/icons/3duks-192.png", sizes: "192x192", type: "image/png" },
+      { src: "/icons/3duks-512.png", sizes: "512x512", type: "image/png" },
+      { src: "/icons/3duks-maskable-512.png", sizes: "512x512", type: "image/png", purpose: "maskable" },
     ],
   };
 }
