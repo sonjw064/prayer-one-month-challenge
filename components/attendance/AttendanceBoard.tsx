@@ -4,20 +4,32 @@ import { useEffect, useState } from "react";
 import {
   ATTENDANCE_LABELS,
   ATTENDANCE_STATUSES,
+  MAX_MEMO_LENGTH,
   type AttendanceStatus,
   type AttendanceView,
 } from "../../src/features/attendance/labels";
 
-type Statuses = Record<string, AttendanceStatus | null>;
+type Mark = { status: AttendanceStatus | null; memo: string };
+type Marks = Record<string, Mark>;
 type Query = { samId: string | null; date: string | null };
 
-function toStatuses(view: AttendanceView): Statuses {
-  return Object.fromEntries(view.members.map((member) => [member.id, member.status]));
+function normalizeMemo(memo: string): string {
+  return memo.replace(/\s+/gu, " ").trim();
 }
 
-function sameStatuses(a: Statuses, b: Statuses): boolean {
+function toMarks(view: AttendanceView): Marks {
+  return Object.fromEntries(view.members.map((member) => [member.id, { status: member.status, memo: member.memo }]));
+}
+
+/** A note only counts for people who are checked. */
+function sameMarks(a: Marks, b: Marks): boolean {
   const keys = new Set([...Object.keys(a), ...Object.keys(b)]);
-  for (const key of keys) if ((a[key] ?? null) !== (b[key] ?? null)) return false;
+  for (const key of keys) {
+    const left = a[key] ?? { status: null, memo: "" };
+    const right = b[key] ?? { status: null, memo: "" };
+    if (left.status !== right.status) return false;
+    if (left.status && normalizeMemo(left.memo) !== normalizeMemo(right.memo)) return false;
+  }
   return true;
 }
 
@@ -39,8 +51,8 @@ function saveError(code: string | undefined): string {
 export function AttendanceBoard() {
   const [query, setQuery] = useState<Query>({ samId: null, date: null });
   const [view, setView] = useState<AttendanceView | null>(null);
-  const [statuses, setStatuses] = useState<Statuses>({});
-  const [saved, setSaved] = useState<Statuses>({});
+  const [marks, setMarks] = useState<Marks>({});
+  const [saved, setSaved] = useState<Marks>({});
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
@@ -60,8 +72,8 @@ export function AttendanceBoard() {
       .then((next) => {
         if (cancelled) return;
         setView(next);
-        setStatuses(toStatuses(next));
-        setSaved(toStatuses(next));
+        setMarks(toMarks(next));
+        setSaved(toMarks(next));
         setError("");
         setLoading(false);
       })
@@ -75,11 +87,11 @@ export function AttendanceBoard() {
     };
   }, [query]);
 
-  const dirty = !sameStatuses(statuses, saved);
+  const dirty = !sameMarks(marks, saved);
   const members = view?.members ?? [];
   const counts = { present: 0, absent: 0, worship_only: 0 };
   for (const member of members) {
-    const status = statuses[member.id];
+    const status = marks[member.id]?.status;
     if (status) counts[status] += 1;
   }
   const unchecked = members.length - counts.present - counts.absent - counts.worship_only;
@@ -94,12 +106,18 @@ export function AttendanceBoard() {
 
   function setStatus(id: string, status: AttendanceStatus | null) {
     setMessage("");
-    setStatuses((current) => ({ ...current, [id]: status }));
+    // Unchecking someone also drops their note: notes belong to a check.
+    setMarks((current) => ({ ...current, [id]: { status, memo: status ? current[id]?.memo ?? "" : "" } }));
+  }
+
+  function setMemo(id: string, memo: string) {
+    setMessage("");
+    setMarks((current) => ({ ...current, [id]: { status: current[id]?.status ?? null, memo } }));
   }
 
   function allPresent() {
     setMessage("");
-    setStatuses(Object.fromEntries(members.map((member) => [member.id, "present" as const])));
+    setMarks(Object.fromEntries(members.map((member) => [member.id, { status: "present" as const, memo: marks[member.id]?.memo ?? "" }])));
   }
 
   async function save() {
@@ -115,15 +133,19 @@ export function AttendanceBoard() {
           samId: view.sam.id,
           date: view.date,
           entries: members.flatMap((member) => {
-            const status = statuses[member.id];
-            return status ? [{ rosterId: member.id, status }] : [];
+            const mark = marks[member.id];
+            return mark?.status ? [{ rosterId: member.id, status: mark.status, memo: normalizeMemo(mark.memo) }] : [];
           }),
         }),
         signal: AbortSignal.timeout(20_000),
       });
       const body = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(saveError(body.code));
-      setSaved({ ...statuses });
+      const normalized = Object.fromEntries(
+        Object.entries(marks).map(([id, mark]) => [id, { status: mark.status, memo: mark.status ? normalizeMemo(mark.memo) : "" }]),
+      );
+      setMarks(normalized);
+      setSaved(normalized);
       const result = body.result as { saved: boolean; unchecked: number };
       setMessage(
         !result.saved
@@ -199,6 +221,7 @@ export function AttendanceBoard() {
         </p>
         <p className="helper-text">
           출석은 샘 모임 참석, 예배는 샘 모임은 빠졌지만 예배에 참석한 경우입니다. 같은 버튼을 다시 누르면 체크가 해제됩니다.
+          체크한 사람에게는 메모를 남길 수 있고, 꼭 쓰지 않아도 됩니다. 민감한 개인 사정은 꼭 필요한 내용만 적어 주세요.
         </p>
 
         {members.length === 0 ? (
@@ -206,7 +229,7 @@ export function AttendanceBoard() {
         ) : (
           <ul className="att-list">
             {members.map((member) => {
-              const current = statuses[member.id] ?? null;
+              const current = marks[member.id]?.status ?? null;
               return (
                 <li className="att-row" key={member.id}>
                   <span className="att-name">{member.name}</span>
@@ -224,6 +247,17 @@ export function AttendanceBoard() {
                       </button>
                     ))}
                   </div>
+                  {current && (
+                    <input
+                      className="att-memo"
+                      aria-label={`${member.name} 메모`}
+                      placeholder="메모 (선택)"
+                      maxLength={MAX_MEMO_LENGTH}
+                      value={marks[member.id]?.memo ?? ""}
+                      disabled={loading || saving}
+                      onChange={(event) => setMemo(member.id, event.target.value)}
+                    />
+                  )}
                 </li>
               );
             })}

@@ -54,6 +54,19 @@ describe("attendance contracts", () => {
     expect(read("components/attendance/AttendanceBoard.tsx")).toContain("저장하지 않은 체크가 있습니다");
   });
 
+  it("notes are optional, limited to 200 characters in the database and only for checked people", () => {
+    const sql = read("drizzle/20261105010000_attendance_memo.sql");
+    expect(sql).toContain("add column memo text not null default ''");
+    expect(sql).toContain("char_length(memo) <= 200");
+    const service = read("src/features/attendance/service.ts");
+    expect(service).toContain("memo: entry.memo");
+    expect(service).toContain("attendanceRecords.memo");
+    const board = read("components/attendance/AttendanceBoard.tsx");
+    expect(board).toContain("메모 (선택)");
+    expect(board).toMatch(/\{current && \(\s*<input/);
+    expect(board).toContain("MAX_MEMO_LENGTH");
+  });
+
   it("the privacy policy mentions attendance information", () => {
     expect(read("app/(public)/privacy/page.tsx")).toContain("샘 출석");
   });

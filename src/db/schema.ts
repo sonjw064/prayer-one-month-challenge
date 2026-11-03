@@ -416,6 +416,7 @@ export const attendanceRecords = appSchema.table(
       .notNull()
       .references(() => memberRoster.id, { onDelete: "cascade" }),
     status: text("status").notNull(),
+    memo: text("memo").notNull().default(""),
   },
   (t) => [
     primaryKey({ columns: [t.sessionId, t.rosterId] }),

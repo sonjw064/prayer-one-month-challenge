@@ -2,7 +2,7 @@ import { z } from "zod";
 import { DomainError } from "../../lib/http";
 import { addDays } from "../challenge/date";
 import { samKey, type Identity } from "../pastoral/policy";
-import { ATTENDANCE_STATUSES, type AttendanceStatus } from "./labels";
+import { ATTENDANCE_STATUSES, MAX_MEMO_LENGTH, type AttendanceStatus } from "./labels";
 
 /** Sam leaders and village heads may enter or fix attendance for today and this many days back (8 weeks). */
 export const LEADER_EDIT_DAYS = 56;
@@ -41,15 +41,30 @@ export function membersOfSam(roster: Identity[], samName: string): SamMember[] {
     .sort((a, b) => a.name.localeCompare(b.name, "ko") || a.id.localeCompare(b.id));
 }
 
-export type AttendanceEntry = { rosterId: string; status: AttendanceStatus };
+export type AttendanceEntry = { rosterId: string; status: AttendanceStatus; memo: string };
+
+// No control characters; the note is a single line of at most MAX_MEMO_LENGTH characters.
+const CONTROL_CHARS = /[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]/u;
 
 const saveSchema = z.object({
   samId: z.string().uuid(),
   date: z.string().refine(isDateKey),
   entries: z
-    .array(z.object({ rosterId: z.string().uuid(), status: z.enum(ATTENDANCE_STATUSES) }))
+    .array(
+      z.object({
+        rosterId: z.string().uuid(),
+        status: z.enum(ATTENDANCE_STATUSES),
+        memo: z.string().max(MAX_MEMO_LENGTH * 2).nullish(),
+      }),
+    )
     .max(MAX_ENTRIES),
 });
+
+function cleanMemo(value: string | null | undefined): string {
+  const text = (value ?? "").normalize("NFC").replace(/\s+/gu, " ").trim();
+  if (text.length > MAX_MEMO_LENGTH || CONTROL_CHARS.test(text)) throw new DomainError("INVALID_INPUT", 400);
+  return text;
+}
 
 export type AttendanceSaveInput = { samId: string; date: string; entries: AttendanceEntry[] };
 
@@ -58,7 +73,14 @@ export function parseAttendanceSave(raw: unknown): AttendanceSaveInput {
   if (!parsed.success) throw new DomainError("INVALID_INPUT", 400);
   const ids = parsed.data.entries.map((entry) => entry.rosterId);
   if (new Set(ids).size !== ids.length) throw new DomainError("INVALID_INPUT", 400);
-  return parsed.data;
+  return {
+    ...parsed.data,
+    entries: parsed.data.entries.map((entry) => ({
+      rosterId: entry.rosterId,
+      status: entry.status,
+      memo: cleanMemo(entry.memo),
+    })),
+  };
 }
 
 /** Only people who currently belong to the sam may be recorded for it. */
