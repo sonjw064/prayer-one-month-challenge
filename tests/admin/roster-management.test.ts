@@ -2,6 +2,8 @@ import { describe, expect, it } from "vitest";
 import { DomainError } from "../../src/lib/http";
 import {
   assertActorNotSelectedForDeletion,
+  assertAdminRemains,
+  assertNoAdminSelectedForDeletion,
   passwordModeFromHash,
   uniqueRosterIds,
 } from "../../src/features/admin/roster-service";
@@ -26,5 +28,37 @@ describe("admin roster management helpers", () => {
         "u1",
       ),
     ).toThrowError(new DomainError("CANNOT_DELETE_SELF", 409));
+  });
+
+  it("blocks deleting rosters that still have administrator permission", () => {
+    expect(() =>
+      assertNoAdminSelectedForDeletion([
+        { id: "r1", isAdmin: false },
+        { id: "r2", isAdmin: true },
+      ]),
+    ).toThrowError(new DomainError("CANNOT_DELETE_ADMIN", 409));
+  });
+
+  it("allows deleting rosters once administrator permission was removed", () => {
+    expect(() =>
+      assertNoAdminSelectedForDeletion([
+        { id: "r1", isAdmin: false },
+        { id: "r2", isAdmin: false },
+      ]),
+    ).not.toThrow();
+  });
+
+  it("keeps at least one active administrator", () => {
+    const base = { wasAdmin: true, willBeAdmin: false, willBeActive: true };
+    expect(() => assertAdminRemains({ ...base, otherActiveAdmins: 0 })).toThrowError(
+      new DomainError("ADMIN_REQUIRED", 409),
+    );
+    expect(() =>
+      assertAdminRemains({ ...base, willBeAdmin: true, willBeActive: false, otherActiveAdmins: 0 }),
+    ).toThrowError(new DomainError("ADMIN_REQUIRED", 409));
+    expect(() => assertAdminRemains({ ...base, otherActiveAdmins: 1 })).not.toThrow();
+    expect(() =>
+      assertAdminRemains({ wasAdmin: false, willBeAdmin: false, willBeActive: true, otherActiveAdmins: 0 }),
+    ).not.toThrow();
   });
 });
