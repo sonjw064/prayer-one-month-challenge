@@ -386,3 +386,39 @@ export const signupRequests = appSchema.table(
     index("signup_requests_status_idx").on(t.status, t.createdAt),
   ],
 );
+
+export const attendanceSessions = appSchema.table(
+  "attendance_sessions",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    meetingDate: date("meeting_date").notNull(),
+    samId: uuid("sam_id").references(() => sams.id, { onDelete: "set null" }),
+    samName: text("sam_name").notNull(),
+    village: text("village").notNull().default(""),
+    headcount: integer("headcount").notNull(),
+    savedBy: uuid("saved_by").references(() => users.id, { onDelete: "set null" }),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    uniqueIndex("attendance_sessions_date_sam_uq").on(t.meetingDate, t.samId),
+    index("attendance_sessions_date_idx").on(t.meetingDate),
+  ],
+);
+
+export const attendanceRecords = appSchema.table(
+  "attendance_records",
+  {
+    sessionId: uuid("session_id")
+      .notNull()
+      .references(() => attendanceSessions.id, { onDelete: "cascade" }),
+    rosterId: uuid("roster_id")
+      .notNull()
+      .references(() => memberRoster.id, { onDelete: "cascade" }),
+    status: text("status").notNull(),
+  },
+  (t) => [
+    primaryKey({ columns: [t.sessionId, t.rosterId] }),
+    index("attendance_records_roster_idx").on(t.rosterId),
+  ],
+);
