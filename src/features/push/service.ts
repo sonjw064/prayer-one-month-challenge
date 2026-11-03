@@ -115,11 +115,7 @@ async function removeExpiredPushEndpoint(endpoint: string): Promise<void> {
     .where(eq(pushSubscriptions.endpoint, endpoint));
 }
 
-export async function sendNoticePush(notice: {
-  id: string;
-  title: string;
-  body: string;
-}): Promise<PushSummary> {
+async function broadcastPush(payload: string): Promise<PushSummary> {
   const config = requireWebPushConfig();
 
   webPush.setVapidDetails(
@@ -136,13 +132,6 @@ export async function sendNoticePush(notice: {
     })
     .from(pushSubscriptions);
 
-  const payload = JSON.stringify({
-    title: notice.title,
-    body: notice.body.slice(0, 120),
-    url: `/notices/${notice.id}`,
-    tag: `notice-${notice.id}`,
-  });
-
   return fanOutPush(
     rows,
     async (target) => {
@@ -158,5 +147,36 @@ export async function sendNoticePush(notice: {
       );
     },
     removeExpiredPushEndpoint,
+  );
+}
+
+export async function sendNoticePush(notice: {
+  id: string;
+  title: string;
+  body: string;
+}): Promise<PushSummary> {
+  return broadcastPush(
+    JSON.stringify({
+      title: notice.title,
+      body: notice.body.slice(0, 120),
+      url: `/notices/${notice.id}`,
+      tag: `notice-${notice.id}`,
+    }),
+  );
+}
+
+export async function sendCalendarEventPush(event: {
+  id: string;
+  title: string;
+  body: string;
+  startDate: string;
+}): Promise<PushSummary> {
+  return broadcastPush(
+    JSON.stringify({
+      title: event.title,
+      body: event.body.slice(0, 120),
+      url: `/calendar?date=${event.startDate}`,
+      tag: `calendar-${event.id}`,
+    }),
   );
 }
