@@ -19,8 +19,8 @@ describe("PWA manifest", () => {
   });
 
   it("ships correctly sized install icons", () => {
-    expect(pngSize("public/icons/56-heart-192.png")).toEqual({ width: 192, height: 192 });
-    expect(pngSize("public/icons/56-heart-512.png")).toEqual({ width: 512, height: 512 });
-    expect(pngSize("public/icons/56-heart-maskable-512.png")).toEqual({ width: 512, height: 512 });
+    expect(pngSize("public/icons/3duks-192.png")).toEqual({ width: 192, height: 192 });
+    expect(pngSize("public/icons/3duks-512.png")).toEqual({ width: 512, height: 512 });
+    expect(pngSize("public/icons/3duks-maskable-512.png")).toEqual({ width: 512, height: 512 });
   });
 });
