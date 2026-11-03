@@ -1429,3 +1429,4 @@ button.evcal-cell:hover { background: #f3f4f6; }
   .att-choices { width: 100%; }
   .att-choice { flex: 1; }
 }
+.att-memo { flex: 1 0 100%; min-height: 40px; padding: 6px 12px; border: 1px solid #d1d5db; border-radius: 10px; font: inherit; }

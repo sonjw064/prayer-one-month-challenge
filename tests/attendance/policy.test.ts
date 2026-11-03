@@ -86,6 +86,33 @@ describe("saving attendance input", () => {
     expect(parseAttendanceSave({ ...base, entries: [{ rosterId: P1, status: "absent" }] }).entries).toHaveLength(1);
   });
 
+  it("treats the note as optional and defaults it to an empty string", () => {
+    const parsed = parseAttendanceSave({
+      ...base,
+      entries: [
+        { rosterId: P1, status: "present" },
+        { rosterId: P2, status: "absent", memo: null },
+      ],
+    });
+    expect(parsed.entries.map((entry) => entry.memo)).toEqual(["", ""]);
+  });
+
+  it("keeps a note on one line, trimmed, and accepts exactly 200 characters", () => {
+    const parsed = parseAttendanceSave({
+      ...base,
+      entries: [{ rosterId: P1, status: "absent", memo: "  감기로\n  쉬었음 \t " }],
+    });
+    expect(parsed.entries[0].memo).toBe("감기로 쉬었음");
+    const longest = "가".repeat(200);
+    expect(parseAttendanceSave({ ...base, entries: [{ rosterId: P1, status: "absent", memo: longest }] }).entries[0].memo).toBe(longest);
+  });
+
+  it("rejects notes that are too long or contain control characters", () => {
+    invalid({ ...base, entries: [{ rosterId: P1, status: "absent", memo: "가".repeat(201) }] });
+    invalid({ ...base, entries: [{ rosterId: P1, status: "absent", memo: "나쁜\u0007문자" }] });
+    invalid({ ...base, entries: [{ rosterId: P1, status: "absent", memo: 123 }] });
+  });
+
   it("accepts an empty sheet, which clears the day", () => {
     expect(parseAttendanceSave({ ...base, entries: [] }).entries).toEqual([]);
   });
@@ -102,8 +129,8 @@ describe("saving attendance input", () => {
 
   it("only allows people who belong to the sam", () => {
     const members = [{ id: P1, name: "박길동" }];
-    expect(() => assertEntriesBelong([{ rosterId: P1, status: "present" }], members)).not.toThrow();
-    expect(() => assertEntriesBelong([{ rosterId: P2, status: "present" }], members)).toThrowError(
+    expect(() => assertEntriesBelong([{ rosterId: P1, status: "present", memo: "" }], members)).not.toThrow();
+    expect(() => assertEntriesBelong([{ rosterId: P2, status: "present", memo: "" }], members)).toThrowError(
       new DomainError("MEMBER_NOT_IN_SAM", 400),
     );
   });

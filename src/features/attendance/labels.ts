@@ -8,7 +8,10 @@ export const ATTENDANCE_LABELS: Record<AttendanceStatus, string> = {
   worship_only: "예배",
 };
 
-export type AttendanceMember = { id: string; name: string; status: AttendanceStatus | null };
+export const MAX_MEMO_LENGTH = 200;
+
+/** `memo` is optional and only kept for people who were checked. */
+export type AttendanceMember = { id: string; name: string; status: AttendanceStatus | null; memo: string };
 
 export type AttendanceSamOption = { id: string; name: string; village: string };
 

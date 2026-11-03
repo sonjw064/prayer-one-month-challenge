@@ -51,18 +51,25 @@ export async function loadAttendance(
     .limit(1);
   const saved = session
     ? await db
-        .select({ rosterId: attendanceRecords.rosterId, status: attendanceRecords.status })
+        .select({ rosterId: attendanceRecords.rosterId, status: attendanceRecords.status, memo: attendanceRecords.memo })
         .from(attendanceRecords)
         .where(eq(attendanceRecords.sessionId, session.id))
     : [];
-  const statusById = new Map(saved.map((row) => [row.rosterId, row.status as AttendanceStatus]));
+  const recordById = new Map(saved.map((row) => [row.rosterId, row]));
 
   return {
     sams: options,
     sam: { id: sam.id, name: sam.name },
     date,
     range,
-    members: people.map((person) => ({ ...person, status: statusById.get(person.id) ?? null })),
+    members: people.map((person) => {
+      const record = recordById.get(person.id);
+      return {
+        ...person,
+        status: (record?.status as AttendanceStatus | undefined) ?? null,
+        memo: record?.memo ?? "",
+      };
+    }),
     savedAt: session?.updatedAt.toISOString() ?? null,
   };
 }
@@ -110,7 +117,12 @@ export async function saveAttendance(actor: Actor, input: AttendanceSaveInput): 
 
     await tx.delete(attendanceRecords).where(eq(attendanceRecords.sessionId, session.id));
     await tx.insert(attendanceRecords).values(
-      input.entries.map((entry) => ({ sessionId: session.id, rosterId: entry.rosterId, status: entry.status })),
+      input.entries.map((entry) => ({
+        sessionId: session.id,
+        rosterId: entry.rosterId,
+        status: entry.status,
+        memo: entry.memo,
+      })),
     );
     return {
       saved: true,
