@@ -244,7 +244,7 @@ export async function listRosterForAdmin({
   };
 }
 
-async function duplicateExists(
+export async function duplicateExists(
   canonicalName: string,
   lookupHash: string | null,
   excludeId?: string,

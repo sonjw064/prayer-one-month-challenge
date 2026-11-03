@@ -14,6 +14,7 @@ export default async function LoginPage() {
       </header>
       <LoginForm />
       <nav aria-label="앱 안내" style={{ display: "flex", flexWrap: "wrap", gap: "12px 24px", marginTop: 24 }}>
+        <Link href="/signup" prefetch={false}>가입 신청</Link>
         <Link href="/about">앱 소개</Link>
         <Link href="/privacy">개인정보처리방침</Link>
       </nav>

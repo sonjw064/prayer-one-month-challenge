@@ -1385,3 +1385,14 @@ button.evcal-cell:hover { background: #f3f4f6; }
 }
 .evcal-event.is-important { border-left: 4px solid #b42318; padding-left: 12px; }
 .evcal-event.is-important > strong { color: #b42318; }
+
+/* Sign-up requests */
+.signup-trap { position: absolute; left: -10000px; width: 1px; height: 1px; overflow: hidden; }
+.signup-row { align-items: start; }
+.signup-approve-fields { margin-top: 10px; }
+.signup-recent { margin-top: 16px; }
+.signup-recent summary { cursor: pointer; font-weight: 600; padding: 8px 0; }
+.signup-recent ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.signup-recent li { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.admin-hub-link { position: relative; }
+.admin-hub-link .nav-badge { margin-left: 8px; }

@@ -363,3 +363,26 @@ export const calendarEvents = appSchema.table(
   },
   (t) => [index("calendar_events_dates_idx").on(t.startDate, t.endDate)],
 );
+
+export const signupRequests = appSchema.table(
+  "signup_requests",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    name: text("name").notNull(),
+    canonicalName: text("canonical_name").notNull(),
+    phoneLookupHash: text("phone_lookup_hash").notNull(),
+    phoneCiphertext: text("phone_ciphertext"),
+    memo: text("memo").notNull().default(""),
+    status: text("status").notNull().default("pending"),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    decidedAt: timestamp("decided_at", { withTimezone: true }),
+    decidedBy: uuid("decided_by").references(() => users.id, { onDelete: "set null" }),
+    rosterId: uuid("roster_id").references(() => memberRoster.id, { onDelete: "set null" }),
+  },
+  (t) => [
+    uniqueIndex("signup_requests_pending_uq")
+      .on(t.canonicalName, t.phoneLookupHash)
+      .where(sql`${t.status} = 'pending'`),
+    index("signup_requests_status_idx").on(t.status, t.createdAt),
+  ],
+);
