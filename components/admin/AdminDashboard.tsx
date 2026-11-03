@@ -392,7 +392,7 @@ export function AdminDashboard({
 
         <form className="roster-import-form" onSubmit={submitRosterImport}>
           <div>
-            <strong>56공동체 명단 가져오기</strong>
+            <strong>삼덕청년부 명단 가져오기</strong>
             <p className="helper-text">
               구형 .xls 파일만 허용합니다. 기존 참여자의 기도기록은 유지됩니다.
             </p>
@@ -401,7 +401,7 @@ export function AdminDashboard({
             name="file"
             type="file"
             accept=".xls,application/vnd.ms-excel"
-            aria-label="56공동체 XLS 파일"
+            aria-label="삼덕청년부 XLS 파일"
             required
             disabled={importBusy}
           />

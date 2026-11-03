@@ -42,7 +42,7 @@ test.describe("management organization and booking period", () => {
     await page.setViewportSize({width:360,height:800});
     await page.goto("/admin/users");
     await expect(page.getByRole("heading", {name:"샘 리더 관리",exact:true})).toBeVisible();
-    for (const name of ["샘 리더 엑셀 예제 다운로드", "56공동체 명단 엑셀 예제 다운로드"]) {
+    for (const name of ["샘 리더 엑셀 예제 다운로드", "삼덕청년부 명단 엑셀 예제 다운로드"]) {
       const link = page.getByRole("link", {name,exact:true});
       const response = await page.request.get((await link.getAttribute("href"))!);
       expect(response.ok()).toBe(true);

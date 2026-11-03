@@ -188,7 +188,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 }
 
 
-/* 56사랑 shared member shell */
+/* 3D shared member shell */
 .community-app {
   min-height: 100vh;
   display: grid;
@@ -814,7 +814,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 }
 
 
-/* 56사랑 admin hub */
+/* 3D admin hub */
 .admin-hub {
   min-height: 100dvh;
   display: grid;
@@ -1128,7 +1128,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 }
 
 
-/* 56사랑 admin visits and settings */
+/* 3D admin visits and settings */
 .admin-visit-management,
 .admin-settings-page {
   display: grid;

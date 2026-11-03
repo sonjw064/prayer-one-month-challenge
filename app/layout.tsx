@@ -6,12 +6,12 @@ import { SessionHeartbeat } from "../components/auth/SessionHeartbeat";
 
 export const metadata: Metadata = {
   title: {
-    default: "56사랑",
-    template: "%s | 56사랑",
+    default: "3D",
+    template: "%s | 3D",
   },
-  description: "56공동체 기도운동, 심방신청, 기도요청, 공지",
-  applicationName: "56사랑",
-  appleWebApp: { capable: true, title: "56사랑", statusBarStyle: "default" },
+  description: "삼덕청년부 기도운동, 심방신청, 기도요청, 공지",
+  applicationName: "3D",
+  appleWebApp: { capable: true, title: "3D", statusBarStyle: "default" },
   icons: {
     icon: [
       { url: "/icons/56-heart-192.png", sizes: "192x192", type: "image/png" },

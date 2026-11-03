@@ -2,7 +2,7 @@ import { existsSync, readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
 const pages = [
-  ["app/(public)/about/page.tsx", "56사랑"],
+  ["app/(public)/about/page.tsx", "3D"],
   ["app/(public)/privacy/page.tsx", "개인정보처리방침"],
 ] as const;
 

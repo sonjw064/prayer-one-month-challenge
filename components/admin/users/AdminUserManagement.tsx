@@ -203,15 +203,15 @@ export function AdminUserManagement({ initial }: { initial: AdminRosterPage }) {
       <section className="card admin-section">
         <form className="roster-import-form" onSubmit={submitImport}>
           <div>
-            <strong>56공동체 명단 가져오기</strong>
+            <strong>삼덕청년부 명단 가져오기</strong>
             <p className="helper-text">.xls 또는 .xlsx 파일을 가져옵니다. 예제의 이름 · 교회직분 · 핸드폰 · 마을 · 샘 열을 유지하고, 현재 관리자도 명단에 포함해 주세요. 기존 기도기록은 유지됩니다.</p>
-            <a className="text-button" href="/templates/community-roster-example.xlsx" download="56공동체-명단-예제.xlsx">56공동체 명단 엑셀 예제 다운로드</a>
+            <a className="text-button" href="/templates/community-roster-example.xlsx" download="삼덕청년부-명단-예제.xlsx">삼덕청년부 명단 엑셀 예제 다운로드</a>
           </div>
           <input
             name="file"
             type="file"
             accept=".xls,.xlsx,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-            aria-label="56공동체 엑셀 파일"
+            aria-label="삼덕청년부 엑셀 파일"
             required
             disabled={importBusy}
           />

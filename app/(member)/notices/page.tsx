@@ -13,7 +13,7 @@ export default async function NoticesPage() {
     <main className="shell">
       <section className="feature-heading">
         <h2>공지</h2>
-        <p>56공동체의 새로운 소식과 안내를 확인하세요.</p>
+        <p>삼덕청년부의 새로운 소식과 안내를 확인하세요.</p>
       </section>
       <NoticeList notices={notices} />
     </main>

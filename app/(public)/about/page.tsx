@@ -3,7 +3,7 @@ import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "앱 소개",
-  description: "삼덕교회 56공동체의 기도, 심방, 소통을 돕는 56사랑 앱과 Google Calendar 연동 안내입니다.",
+  description: "삼덕청년부의 기도, 심방, 소통을 돕는 3D 앱과 Google Calendar 연동 안내입니다.",
   alternates: { canonical: "https://prayer-one-month-challenge.vercel.app/about" },
 };
 
@@ -20,18 +20,18 @@ export default function AboutPage() {
   return (
     <>
       <section className="public-hero" aria-labelledby="about-title">
-        <p className="public-eyebrow">삼덕교회 56공동체를 위한 앱</p>
-        <h1 id="about-title">함께 기도하고,<br />서로를 돌보는 <span>56사랑</span></h1>
+        <p className="public-eyebrow">삼덕청년부를 위한 앱</p>
+        <h1 id="about-title">함께 기도하고,<br />서로를 돌보는 <span>3D</span></h1>
         <p className="public-lead">기도의 일상을 기록하고, 만남을 준비하고, 공동체의 소식을 나눕니다.</p>
         <div className="public-actions">
-          <Link className="public-button" href="/login" prefetch={false}>56사랑 시작하기</Link>
+          <Link className="public-button" href="/login" prefetch={false}>3D 시작하기</Link>
           <Link className="public-text-link" href="/privacy">개인정보처리방침 읽기 →</Link>
         </div>
         <p className="public-caption">앱 소개와 개인정보처리방침은 누구나 볼 수 있습니다. 공동체 기능은 등록된 회원만 이용할 수 있습니다.</p>
       </section>
       <section className="public-section" aria-labelledby="features-title">
         <p className="public-eyebrow">공동체의 일상을 한곳에서</p>
-        <h2 id="features-title">56사랑에서 할 수 있는 일</h2>
+        <h2 id="features-title">3D에서 할 수 있는 일</h2>
         <div className="public-feature-grid">
           {features.map(([number, title, text]) => (
             <article className="public-feature" key={title}>
@@ -51,7 +51,7 @@ export default function AboutPage() {
       </section>
       <section className="public-section public-contact" aria-labelledby="contact-title">
         <h2 id="contact-title">이용 중 도움이 필요하신가요?</h2>
-        <p>로그인, 회원 정보 또는 개인정보 관련 문의는 56공동체 운영 담당자에게 보내 주세요.</p>
+        <p>로그인, 회원 정보 또는 개인정보 관련 문의는 삼덕청년부 운영 담당자에게 보내 주세요.</p>
         <a className="public-text-link" href="mailto:ditto0310@gmail.com">ditto0310@gmail.com</a>
       </section>
     </>

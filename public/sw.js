@@ -1,7 +1,7 @@
 self.addEventListener("push", (event) => {
   const data = event.data ? event.data.json() : {};
   event.waitUntil(
-    self.registration.showNotification(data.title || "56사랑", {
+    self.registration.showNotification(data.title || "3D", {
       body: data.body || "",
       icon: "/icons/56-heart-192.png",
       badge: "/icons/56-heart-192.png",

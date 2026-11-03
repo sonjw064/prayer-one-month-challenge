@@ -156,7 +156,7 @@ export function SamLeaderSettings() {
         <div>
           <strong>샘 리더 파일 가져오기</strong>
           <p className="helper-text">마을 · 마을장 · 샘 · 샘리더 열의 엑셀 파일을 가져옵니다. 직분은 제외하고 이름을 저장합니다.</p>
-          <a className="text-button" href="/templates/sam-leaders-example.xlsx" download="56사랑-샘리더-예제.xlsx">샘 리더 엑셀 예제 다운로드</a>
+          <a className="text-button" href="/templates/sam-leaders-example.xlsx" download="3D-샘리더-예제.xlsx">샘 리더 엑셀 예제 다운로드</a>
         </div>
         <input name="file" type="file" accept=".xls,.xlsx" aria-label="샘 리더 엑셀 파일" required disabled={busy} />
         <button type="submit" className="text-button" disabled={busy || loading}>가져오기</button>

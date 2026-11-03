@@ -12,7 +12,7 @@ for (const width of [360, 1280]) {
       const response = await page.goto(path);
       expect(response?.status()).toBe(200);
       await expect(page).toHaveURL(new RegExp(`${path}$`));
-      await expect(page).toHaveTitle(`${title} | 56사랑`);
+      await expect(page).toHaveTitle(`${title} | 3D`);
       await expect(page.locator("h1")).toHaveCount(1);
       await expect(page.locator("h1")).toBeVisible();
       await expect(page.getByRole("navigation", { name: "공개 안내 메뉴" })).toBeVisible();
