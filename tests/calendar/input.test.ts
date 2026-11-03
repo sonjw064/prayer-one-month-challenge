@@ -22,8 +22,16 @@ describe("calendar event input", () => {
       endDate: "2026-11-09",
       startTime: null,
       endTime: null,
+      isImportant: false,
       notify: false,
     });
+  });
+
+  it("reads the important flag only when it is exactly true", () => {
+    expect(parseCalendarEventInput({ ...base, isImportant: true }).isImportant).toBe(true);
+    expect(parseCalendarEventInput({ ...base, isImportant: false }).isImportant).toBe(false);
+    expect(parseCalendarEventInput({ ...base, isImportant: null }).isImportant).toBe(false);
+    invalid({ ...base, isImportant: "yes" });
   });
 
   it("treats blank form fields as not provided", () => {

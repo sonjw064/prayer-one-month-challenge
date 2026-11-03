@@ -22,6 +22,7 @@ type FormValues = {
   endTime: string;
   location: string;
   description: string;
+  isImportant: boolean;
   notify: boolean;
 };
 
@@ -34,6 +35,7 @@ function initialValues(event: CalendarEvent | null, today: string): FormValues {
     endTime: event?.endTime ?? "",
     location: event?.location ?? "",
     description: event?.description ?? "",
+    isImportant: event?.isImportant ?? false,
     notify: false,
   };
 }
@@ -89,6 +91,7 @@ function EventEditor({
             endTime: values.endTime || null,
             location: values.location,
             description: values.description,
+            isImportant: values.isImportant,
             notify: values.notify,
           }),
           signal: AbortSignal.timeout(25_000),
@@ -152,6 +155,10 @@ function EventEditor({
           <textarea value={values.description} onChange={(e) => set("description", e.target.value)} rows={5} maxLength={2000} disabled={busy} placeholder="준비물, 안내 사항 등" />
         </label>
         <label className="checkbox-row">
+          <input type="checkbox" checked={values.isImportant} onChange={(e) => set("isImportant", e.target.checked)} disabled={busy} />
+          중요 일정 (성도 화면에 붉은색으로 표시)
+        </label>
+        <label className="checkbox-row">
           <input type="checkbox" checked={values.notify} onChange={(e) => set("notify", e.target.checked)} disabled={busy} />
           저장하면서 성도에게 알림 보내기
         </label>
@@ -180,7 +187,10 @@ function EventRow({
   return (
     <article className="admin-notice-row">
       <div>
-        <div className="admin-notice-title-line"><strong>{event.title}</strong></div>
+        <div className="admin-notice-title-line">
+          <strong>{event.title}</strong>
+          {event.isImportant && <span className="evcal-badge">중요</span>}
+        </div>
         <p className="helper-text">
           {describeEventDates(event)} · {describeEventTime(event)}
           {event.location ? ` · ${event.location}` : ""}

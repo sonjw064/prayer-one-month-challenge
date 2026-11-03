@@ -1359,9 +1359,11 @@ button.evcal-cell:hover { background: #f3f4f6; }
 .evcal-cell.is-selected { background: #253b32; }
 .evcal-cell.is-selected .evcal-day { color: #fff; }
 .evcal-cell.is-selected .evcal-dots i { background: #fff; }
+.evcal-cell.is-selected .evcal-dots i.is-important { background: #fecaca; }
 .evcal-day { font-weight: 600; }
 .evcal-dots { display: flex; gap: 3px; min-height: 6px; }
 .evcal-dots i { width: 6px; height: 6px; border-radius: 50%; background: #253b32; }
+.evcal-dots i.is-important { background: #b42318; }
 .evcal-event { display: grid; gap: 4px; padding: 12px 0; border-top: 1px solid #e5e7eb; }
 .evcal-event:first-of-type { border-top: 0; }
 .evcal-event-meta { display: flex; flex-wrap: wrap; gap: 4px 12px; margin: 0; color: #4b5563; font-size: .92rem; }
@@ -1377,3 +1379,9 @@ button.evcal-cell:hover { background: #f3f4f6; }
 .evcal-time-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .evcal-past { margin-top: 16px; }
 .evcal-past summary { cursor: pointer; font-weight: 600; padding: 8px 0; }
+.evcal-badge {
+  display: inline-block; margin-right: 6px; padding: 1px 8px; border-radius: 999px;
+  background: #b42318; color: #fff; font-size: .78rem; font-weight: 700; line-height: 1.5; vertical-align: middle;
+}
+.evcal-event.is-important { border-left: 4px solid #b42318; padding-left: 12px; }
+.evcal-event.is-important > strong { color: #b42318; }

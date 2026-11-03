@@ -84,11 +84,12 @@ export function eventOccursOn(
   return event.startDate <= date && date <= event.endDate;
 }
 
-/** Events on a date: all-day first, then by start time, then by title. */
+/** Events on a date: important first, then all-day, then by start time, then by title. */
 export function eventsOnDate(events: CalendarEvent[], date: string): CalendarEvent[] {
   return events
     .filter((event) => eventOccursOn(event, date))
     .sort((a, b) => {
+      if (a.isImportant !== b.isImportant) return a.isImportant ? -1 : 1;
       if (a.startTime === b.startTime) return a.title.localeCompare(b.title, "ko");
       if (a.startTime === null) return -1;
       if (b.startTime === null) return 1;
@@ -130,6 +131,11 @@ export function describeEventTime(
   return event.endTime
     ? `${formatKoreanTime(event.startTime)} ~ ${formatKoreanTime(event.endTime)}`
     : formatKoreanTime(event.startTime);
+}
+
+/** Push notification title; important events are prefixed. */
+export function pushTitleForEvent(event: Pick<CalendarEvent, "title" | "isImportant">): string {
+  return event.isImportant ? `[중요] ${event.title}` : event.title;
 }
 
 /** Body text of the push notification for an event. */

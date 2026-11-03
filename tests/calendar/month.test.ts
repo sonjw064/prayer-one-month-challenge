@@ -5,6 +5,7 @@ import {
   describeEventForPush,
   describeEventTime,
   eventsOnDate,
+  pushTitleForEvent,
   formatKoreanTime,
   formatMonthKey,
   isRealDate,
@@ -25,6 +26,7 @@ function event(overrides: Partial<CalendarEvent>): CalendarEvent {
     endDate: "2026-11-09",
     startTime: null,
     endTime: null,
+    isImportant: false,
     ...overrides,
   };
 }
@@ -93,6 +95,26 @@ describe("calendar month helpers", () => {
       event({ id: "early", title: "아침", startTime: "07:30" }),
     ];
     expect(eventsOnDate(events, "2026-11-09").map((e) => e.id)).toEqual(["all", "early", "late"]);
+  });
+
+  it("puts important events first, then all-day, then by start time", () => {
+    const events = [
+      event({ id: "late", title: "저녁", startTime: "19:00" }),
+      event({ id: "all", title: "종일" }),
+      event({ id: "imp-late", title: "중요 저녁", startTime: "20:00", isImportant: true }),
+      event({ id: "imp-early", title: "중요 아침", startTime: "07:00", isImportant: true }),
+    ];
+    expect(eventsOnDate(events, "2026-11-09").map((e) => e.id)).toEqual([
+      "imp-early",
+      "imp-late",
+      "all",
+      "late",
+    ]);
+  });
+
+  it("prefixes important events in the push title", () => {
+    expect(pushTitleForEvent(event({ title: "수련회" }))).toBe("수련회");
+    expect(pushTitleForEvent(event({ title: "수련회", isImportant: true }))).toBe("[중요] 수련회");
   });
 
   it("formats Korean dates and times", () => {

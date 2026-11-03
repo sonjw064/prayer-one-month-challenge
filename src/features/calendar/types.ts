@@ -10,6 +10,8 @@ export type CalendarEvent = {
   /** HH:MM, null for an all-day event */
   startTime: string | null;
   endTime: string | null;
+  /** Highlighted in red for members. */
+  isImportant: boolean;
 };
 
 export type CalendarEventInput = {
@@ -20,6 +22,7 @@ export type CalendarEventInput = {
   endDate: string;
   startTime: string | null;
   endTime: string | null;
+  isImportant: boolean;
   notify: boolean;
 };
 

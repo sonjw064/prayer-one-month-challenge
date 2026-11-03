@@ -16,8 +16,11 @@ import type { CalendarEvent } from "../../src/features/calendar/types";
 
 function EventCard({ event }: { event: CalendarEvent }) {
   return (
-    <article className="evcal-event">
-      <strong>{event.title}</strong>
+    <article className={event.isImportant ? "evcal-event is-important" : "evcal-event"}>
+      <strong>
+        {event.isImportant && <span className="evcal-badge">중요</span>}
+        {event.title}
+      </strong>
       <p className="evcal-event-meta">
         {event.startDate !== event.endDate && <span>{describeEventDates(event)}</span>}
         <span>{describeEventTime(event)}</span>
@@ -131,12 +134,12 @@ export function CalendarView({
                     role="gridcell"
                     className={classes}
                     aria-pressed={cell.date === selected}
-                    aria-label={`${formatKoreanDate(cell.date)}${dayEvents.length ? `, 일정 ${dayEvents.length}개` : ""}`}
+                    aria-label={`${formatKoreanDate(cell.date)}${dayEvents.length ? `, 일정 ${dayEvents.length}개` : ""}${dayEvents.some((event) => event.isImportant) ? ", 중요 일정 포함" : ""}`}
                     onClick={() => setSelected(cell.date)}
                   >
                     <span className="evcal-day">{cell.day}</span>
                     <span className="evcal-dots" aria-hidden="true">
-                      {dayEvents.slice(0, 3).map((event) => <i key={event.id} />)}
+                      {dayEvents.slice(0, 3).map((event) => <i key={event.id} className={event.isImportant ? "is-important" : undefined} />)}
                     </span>
                   </button>
                 );
@@ -166,7 +169,10 @@ export function CalendarView({
                 <li key={event.id}>
                   <button type="button" className="evcal-upcoming-row" onClick={() => openDate(date)}>
                     <span className="evcal-upcoming-date">{describeEventDates(event)}</span>
-                    <strong>{event.title}</strong>
+                    <strong>
+                      {event.isImportant && <span className="evcal-badge">중요</span>}
+                      {event.title}
+                    </strong>
                     <span className="helper-text">
                       {describeEventTime(event)}{event.location ? ` · ${event.location}` : ""}
                     </span>
