@@ -33,6 +33,19 @@ async function postJson(url: string, body: unknown) {
   return result;
 }
 
+/** Loads the lists without touching React state; callers apply the result from callbacks or event handlers. */
+async function fetchData() {
+  const [registrations, groups] = await Promise.all([
+    fetch("/api/admin/registrations", { cache: "no-store" }),
+    fetch("/api/admin/roster/reset-groups", { cache: "no-store" }),
+  ]);
+  if (!registrations.ok || !groups.ok) throw new Error("LOAD_FAILED");
+  return {
+    list: (await registrations.json()) as RegistrationList,
+    affected: ((await groups.json()) as { affected: number }).affected,
+  };
+}
+
 export function RegistrationCleanup() {
   const [list, setList] = useState<RegistrationList | null>(null);
   const [loading, setLoading] = useState(true);
@@ -46,24 +59,24 @@ export function RegistrationCleanup() {
   const [resetText, setResetText] = useState("");
 
   async function refresh() {
-    const [registrations, groups] = await Promise.all([
-      fetch("/api/admin/registrations", { cache: "no-store" }),
-      fetch("/api/admin/roster/reset-groups", { cache: "no-store" }),
-    ]);
-    if (!registrations.ok || !groups.ok) throw new Error("LOAD_FAILED");
-    setList((await registrations.json()) as RegistrationList);
-    setAffected(((await groups.json()) as { affected: number }).affected);
+    const data = await fetchData();
+    setList(data.list);
+    setAffected(data.affected);
   }
 
   useEffect(() => {
     let cancelled = false;
-    refresh()
-      .then(() => { if (!cancelled) setLoading(false); })
+    fetchData()
+      .then((data) => {
+        if (cancelled) return;
+        setList(data.list);
+        setAffected(data.affected);
+        setLoading(false);
+      })
       .catch(() => {
-        if (!cancelled) {
-          setError("등록 목록을 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.");
-          setLoading(false);
-        }
+        if (cancelled) return;
+        setError("등록 목록을 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.");
+        setLoading(false);
       });
     return () => { cancelled = true; };
   }, []);
