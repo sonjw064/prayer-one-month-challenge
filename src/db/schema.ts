@@ -423,3 +423,38 @@ export const attendanceRecords = appSchema.table(
     index("attendance_records_roster_idx").on(t.rosterId),
   ],
 );
+
+export const bulletins = appSchema.table(
+  "bulletins",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    bulletinDate: date("bulletin_date").notNull(),
+    title: text("title").notNull(),
+    pageCount: integer("page_count").notNull(),
+    status: text("status").notNull().default("draft"),
+    version: uuid("version").defaultRandom().notNull(),
+    createdBy: uuid("created_by").references(() => users.id, { onDelete: "set null" }),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+    publishedAt: timestamp("published_at", { withTimezone: true }),
+  },
+  (t) => [
+    uniqueIndex("bulletins_live_date_uq").on(t.bulletinDate).where(sql`${t.status} <> 'draft'`),
+    index("bulletins_date_idx").on(t.bulletinDate),
+  ],
+);
+
+export const bulletinPages = appSchema.table(
+  "bulletin_pages",
+  {
+    bulletinId: uuid("bulletin_id")
+      .notNull()
+      .references(() => bulletins.id, { onDelete: "cascade" }),
+    pageNo: integer("page_no").notNull(),
+    image: bytea("image").notNull(),
+    width: integer("width").notNull(),
+    height: integer("height").notNull(),
+    thumb: bytea("thumb").notNull(),
+  },
+  (t) => [primaryKey({ columns: [t.bulletinId, t.pageNo] })],
+);

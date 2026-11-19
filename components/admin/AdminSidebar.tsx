@@ -7,6 +7,7 @@ const adminNav = [
   { href: "/admin", label: "대시보드" },
   { href: "/admin/notices", label: "공지 관리" },
   { href: "/admin/calendar", label: "일정 관리" },
+  { href: "/admin/bulletins", label: "주보 관리" },
   { href: "/admin/prayer", label: "기도운동 관리" },
   { href: "/admin/visits", label: "심방 신청 관리" },
   { href: "/admin/prayer-requests", label: "기도요청 관리" },
