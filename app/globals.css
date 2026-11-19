@@ -215,19 +215,19 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   font-size: 1.2rem;
 }
 .sidebar-brand img { border-radius: 12px; }
-.member-nav {
-  display: grid;
-  gap: 7px;
-  align-content: start;
-  /* Long menus scroll inside the sidebar; the scrollbar itself stays hidden. */
+.sidebar-scroll {
+  /* Everything under the logo scrolls together; the scrollbar stays hidden. */
   flex: 1 1 auto;
   min-height: 0;
+  display: flex;
+  flex-direction: column;
   overflow-y: auto;
   overscroll-behavior: contain;
   scrollbar-width: none;
   -ms-overflow-style: none;
 }
-.member-nav::-webkit-scrollbar { display: none; }
+.sidebar-scroll::-webkit-scrollbar { display: none; }
+.member-nav { display: grid; gap: 7px; align-content: start; flex: none; margin-bottom: 12px; }
 .member-nav-link {
   min-height: 48px;
   display: flex;

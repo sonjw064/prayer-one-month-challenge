@@ -48,14 +48,16 @@ function MemberShellContent({ user, menuOpen, setMenuOpen, children }: {
           <strong>3D</strong>
         </div>
 
-        <MemberSidebar prayerMenuEnabled={prayerMenuEnabled} prayerMenuName={name} pastoralVisible={pastoral.visible} pastoralCount={pastoral.count} unreadCount={unreadCount} prayerHasUnread={prayerHasUnread} onNavigate={() => setMenuOpen(false)} />
+        <div className="sidebar-scroll">
+          <MemberSidebar prayerMenuEnabled={prayerMenuEnabled} prayerMenuName={name} pastoralVisible={pastoral.visible} pastoralCount={pastoral.count} unreadCount={unreadCount} prayerHasUnread={prayerHasUnread} onNavigate={() => setMenuOpen(false)} />
 
-        <div className="sidebar-footer">
-          <Link href="/profile" onClick={() => setMenuOpen(false)}>내 정보</Link>
-          {user.role === "admin" && (
-            <Link href="/admin" onClick={() => setMenuOpen(false)}>관리자</Link>
-          )}
-          <LogoutButton />
+          <div className="sidebar-footer">
+            <Link href="/profile" onClick={() => setMenuOpen(false)}>내 정보</Link>
+            {user.role === "admin" && (
+              <Link href="/admin" onClick={() => setMenuOpen(false)}>관리자</Link>
+            )}
+            <LogoutButton />
+          </div>
         </div>
       </aside>
 
