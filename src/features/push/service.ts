@@ -180,3 +180,14 @@ export async function sendCalendarEventPush(event: {
     }),
   );
 }
+
+export async function sendBulletinPush(bulletin: { id: string; title: string; date: string }): Promise<PushSummary> {
+  return broadcastPush(
+    JSON.stringify({
+      title: bulletin.title,
+      body: "새 주보가 올라왔습니다.",
+      url: `/bulletin/${bulletin.id}`,
+      tag: `bulletin-${bulletin.id}`,
+    }),
+  );
+}

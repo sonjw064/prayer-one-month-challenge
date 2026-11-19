@@ -12,6 +12,7 @@ export default function PublicLayout({ children }: Readonly<{ children: React.Re
           <span><strong>3D</strong><small>삼덕청년부</small></span>
         </Link>
         <nav className="public-nav" aria-label="공개 안내 메뉴">
+          <Link href="/bulletin">주보</Link>
           <Link href="/about">앱 소개</Link>
           <Link href="/privacy">개인정보처리방침</Link>
           <Link href="/login" prefetch={false}>로그인</Link>
